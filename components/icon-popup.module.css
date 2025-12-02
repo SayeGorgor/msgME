@@ -1,0 +1,35 @@
+.body {
+    display: none;
+    position: fixed;
+    top: 4rem;
+    right: 0;
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.body.visible {
+    display: block;
+}
+
+.options-list {
+    list-style: none;
+    padding: 0;
+}
+
+.top-option {
+    border-radius: 1rem 1rem 0 0;
+}
+
+.bottom-option {
+    border-radius: 0 0 1rem 1rem;
+}
+
+.options-list li {
+    padding: 1rem;
+}
+
+.options-list li:hover {
+    cursor: pointer;
+    background-color: gray;
+}

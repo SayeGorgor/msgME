@@ -1,0 +1,107 @@
+'use client';
+
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setIsAuthorized } from '@/lib/redux/slices/authSlice';
+import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
+import styles from './login-popup.module.css';
+import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
+import GithubLogo from '@/app/(icons)/github_logo.svg';
+import GoogleLogo from '@/app/(icons)/google_logo.svg';
+import InstagramLogo from '@/app/(icons)/ig_logo.svg';
+
+export default function LoginPopup() {
+    //Redux
+    const dispatch = useDispatch();
+    const showLoginWindow = useSelector(state => state.header.showLoginWindow);
+
+    //States
+    const [userId, setUserId] = useState('');
+    const [password, setPassword] = useState('');
+    const [message, setMessage] = useState('');
+
+    //Functions
+    const attemptLogin = (e) => {
+        e.preventDefault();
+        if(userId === 'sgorgor02@gmail.com' && password === 'password') {
+            dispatch(setShowLoginWindow(false));
+            dispatch(setIsAuthorized(true));
+            setUserId('');
+            setMessage('');
+        } else {
+            setMessage('Incorrect Password');
+        }
+        setPassword('');
+    }
+
+    const closeLoginWindow = () => {
+        dispatch(setShowLoginWindow(false));
+        setUserId('');
+        setPassword('');
+    }
+
+    return(
+        <>
+            <div className={`${styles.body} ${showLoginWindow ? styles.visible : ''}`}>
+                <CloseWindowIcon 
+                    className={styles['close-window-icon']} 
+                    onClick={closeLoginWindow}
+                />
+                <h2>Log In</h2>
+                {message && <p className={styles['error-message']}>{message}</p>}
+                <form className={styles['login-form']} onSubmit={attemptLogin}>
+                    <input 
+                        type='text'
+                        name='user-id'
+                        value={userId}
+                        onChange={(e) => setUserId(e.target.value)}
+                        placeholder='Email or Username'
+                        autoComplete='username'
+                    />
+                    <input 
+                        type='password'
+                        name='password'
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder='Password'
+                        autoComplete='current-password'
+                    />
+                    <button type='submit'>Log In</button>
+                </form>
+                <div className={styles.divider}>
+                    <hr />
+                    <p>Or</p>
+                    <hr />
+                </div>
+                <ul className={styles['external-login-options-list']}>
+                    <li>
+                        <div className={styles['external-login-option']}>
+                            <GithubLogo className={styles.logo} />
+                            <p>Sign in with Github</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div className={styles['external-login-option']}>
+                            <GoogleLogo className={styles.logo} />
+                            <p>Sign in with Google</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div className={styles['external-login-option']}>
+                            <InstagramLogo className={styles.logo} />
+                            <p>Sign in with Instagram</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div 
+                className={`
+                    ${styles.overlay} 
+                    ${showLoginWindow ? styles.visible : ''}
+                `}
+                onClick={closeLoginWindow}
+                inert={showLoginWindow ? false : true}
+            ></div>
+        </>
+    );
+}

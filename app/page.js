@@ -1,66 +1,114 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from "react";
+import { useSelector } from "react-redux";
 import styles from "./page.module.css";
+import DefaultPFP from './(icons)/default_pfp.svg';
+import { setIsAuthorized, setMessage } from "@/lib/redux/slices/authSlice";
+import { setShowAccountOptionsWindow } from "@/lib/redux/slices/headerSlice";
 
 export default function Home() {
+  //Redux
+  const isAuthorized = useSelector(state => state.auth.isAuthorized);
+
+  //States
+  const [message, setMessage] = useState('');
+
   return (
     <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      {isAuthorized ? 
+        <main className={styles['authorized-main']}>
+          <div className={styles['contacts-section']}>
+            <h2>Contacts</h2>
+            <ul className={styles['contact-list']}>
+              <li>
+                <div className={styles['contact-card']}>
+                  <div className={styles['pfp-container']}>
+                    <DefaultPFP className={styles.pfp} />
+                  </div>
+                  <div className={styles['contact-info']}>
+                    <h3>ITZYSTAN123</h3>
+                    <p>I love itzy!</p>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <div className={styles['contact-card']}>
+                  <div className={styles['pfp-container']}>
+                    <DefaultPFP className={styles.pfp} />
+                  </div>
+                  <div className={styles['contact-info']}>
+                    <h3>TAYLORSWIFTSTAN1234</h3>
+                    <p>T-Swizzle the goat!</p>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <div className={styles['contact-card']}>
+                  <div className={styles['pfp-container']}>
+                    <DefaultPFP className={styles.pfp} />
+                  </div>
+                  <div className={styles['contact-info']}>
+                    <h3>PTVSTAN67</h3>
+                    <p>PTV is the single best band to ever exist</p>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div className={styles['messaging-section']}>
+            <div className={styles['messaging-section-contact-banner']}>
+              <h2>ITZYSTAN123</h2>
+            </div>
+            <div className={styles['messaging-section-texts-section']}>
+              <ul className={styles['message-thread']}>
+                <li>
+                  <div className={styles['message-wrapper']}>
+                    <div className={`${styles.message} ${styles['user-message']}`}>
+                      <p>This is my message</p>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <div className={styles['message-wrapper']}>
+                    <div className={`${styles.message} ${styles['contact-message']}`}>
+                      <p>This is my contact's message</p>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <div className={styles['message-wrapper']}>
+                    <div className={`${styles.message} ${styles['contact-message']}`}>
+                      <p>This is my contact's message as well</p>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <div className={styles['message-wrapper']}>
+                    <div className={`${styles.message} ${styles['user-message']}`}>
+                      <p>This is my message again</p>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <form className={styles['messaging-section-text-bar']}>
+              <input
+                type="text"
+                name="pending-message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Type Message..."
+              />
+              <button type="submit">Send</button>
+            </form>
+          </div>
+        </main>
+        :
+        <main className={styles['unauthorized-main']}>
+          <h2>Please Log In Or Sign Up To Begin Messaging!</h2>
+        </main>
+      }
     </div>
   );
 }
