@@ -50,9 +50,6 @@ export default function Header() {
                             </div>
                         </li>
                     </ul>
-                    <div className={styles.icon} onClick={summonIconPopup}>
-                        S
-                    </div>
                 </header>
             }
         </>

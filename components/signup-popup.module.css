@@ -79,6 +79,12 @@
     background-color: red;
 }
 
+.error-message {
+    color: red;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
 
 .overlay {
     position: fixed;

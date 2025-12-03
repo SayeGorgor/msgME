@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsAuthorized } from '@/lib/redux/slices/authSlice';
+import { login, setIsAuthorized } from '@/lib/redux/slices/authSlice';
 import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
 import styles from './login-popup.module.css';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
@@ -14,29 +14,28 @@ export default function LoginPopup() {
     //Redux
     const dispatch = useDispatch();
     const showLoginWindow = useSelector(state => state.header.showLoginWindow);
+    const message = useSelector(state => state.auth.message);
 
     //States
-    const [userId, setUserId] = useState('');
+    const [userID, setuserID] = useState('');
     const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
 
     //Functions
-    const attemptLogin = (e) => {
-        e.preventDefault();
-        if(userId === 'sgorgor02@gmail.com' && password === 'password') {
-            dispatch(setShowLoginWindow(false));
-            dispatch(setIsAuthorized(true));
-            setUserId('');
-            setMessage('');
-        } else {
-            setMessage('Incorrect Password');
-        }
+    const closeLoginWindow = () => {
+        dispatch(setShowLoginWindow(false));
+        setuserID('');
         setPassword('');
     }
 
-    const closeLoginWindow = () => {
-        dispatch(setShowLoginWindow(false));
-        setUserId('');
+    const attemptLogin = (e) => {
+        e.preventDefault();
+        const credentials = {userID, password}
+        dispatch(login(credentials))
+        .then(res => {
+            if(res.meta.requestStatus === 'fulfilled') {
+                closeLoginWindow();
+            }
+        });
         setPassword('');
     }
 
@@ -53,8 +52,8 @@ export default function LoginPopup() {
                     <input 
                         type='text'
                         name='user-id'
-                        value={userId}
-                        onChange={(e) => setUserId(e.target.value)}
+                        value={userID}
+                        onChange={(e) => setuserID(e.target.value)}
                         placeholder='Email or Username'
                         autoComplete='username'
                     />

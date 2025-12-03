@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowAccountOptionsWindow } from '@/lib/redux/slices/headerSlice';
 import styles from './icon-popup.module.css';
-import { setIsAuthorized } from '@/lib/redux/slices/authSlice';
+import { logout, setIsAuthorized } from '@/lib/redux/slices/authSlice';
 
 export default function IconPopup() {
     const popupRef = useRef(null);
@@ -14,9 +14,9 @@ export default function IconPopup() {
     const showAccountOptionsWindow = useSelector(state => state.header.showAccountOptionsWindow);
 
     //Functions
-    const logout = () => {
+    const handleLogout = () => {
+        dispatch(logout());
         dispatch(setShowAccountOptionsWindow(false));
-        dispatch(setIsAuthorized(false));
     }
 
     //Effects
@@ -53,7 +53,7 @@ export default function IconPopup() {
                 <li className={styles['top-option']}>
                     Manage Account
                 </li>
-                <li className={styles['bottom-option']} onClick={logout}>
+                <li className={styles['bottom-option']} onClick={handleLogout}>
                     Log Out
                 </li>
             </ul>

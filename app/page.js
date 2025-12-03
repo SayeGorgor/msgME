@@ -1,18 +1,31 @@
 'use client';
 
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import styles from "./page.module.css";
 import DefaultPFP from './(icons)/default_pfp.svg';
+import { fetchSession } from "@/lib/actions";
 import { setIsAuthorized, setMessage } from "@/lib/redux/slices/authSlice";
 import { setShowAccountOptionsWindow } from "@/lib/redux/slices/headerSlice";
 
 export default function Home() {
   //Redux
+  const dispatch = useDispatch();
   const isAuthorized = useSelector(state => state.auth.isAuthorized);
 
   //States
   const [message, setMessage] = useState('');
+  const [session, setSession] = useState('');
+
+  //Effects
+  useEffect(() => {
+    const getSession = async() => {
+      const session = await fetchSession();
+      if(session) dispatch(setIsAuthorized(true));
+    }
+
+    getSession();
+  }, [])
 
   return (
     <div className={styles.page}>

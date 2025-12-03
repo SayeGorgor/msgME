@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.0",
+    "@supabase/supabase-js": "^2.86.0",
     "@svgr/core": "^8.1.0",
     "@svgr/webpack": "^8.1.0",
+    "dotenv": "^17.2.3",
     "next": "16.0.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
