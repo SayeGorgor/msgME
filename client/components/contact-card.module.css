@@ -1,0 +1,26 @@
+.contact-card {
+  display: flex;
+  align-items: center;
+  height: 4rem;
+  padding-left: 1.5rem;
+}
+
+.contact-card:hover {
+  cursor: pointer;
+  background-color: lightgray;
+}
+
+.contact-info {
+  margin-left: 1rem;
+}
+
+.pfp-container {
+  height: 3rem;
+  width: 3rem;
+  background-color: gray;
+}
+
+.pfp {
+  height: 100%;
+  width: 100%;
+}

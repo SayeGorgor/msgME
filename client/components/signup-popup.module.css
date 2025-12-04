@@ -1,0 +1,106 @@
+.body {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 30rem;
+    width: 25rem;
+    background-color: rgb(240, 251, 255);
+    border-radius: 2rem;
+    z-index: 2;
+}
+
+.body.visible {
+    display: flex;
+}
+
+.body h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.signup-form {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+}
+
+.signup-form input {
+    height: 1.8rem;
+    padding-left: .5rem;
+    margin-bottom: 1rem;
+    background-color: lightgray;
+    border: 1px solid gray;
+    border-radius: 1rem;
+}
+
+.signup-form button {
+    padding: .3rem 0;
+    background-color: rgb(0, 183, 255);
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 2rem;
+    transition: background-color .3s ease;
+}
+
+.signup-form button:hover {
+    cursor: pointer;
+    transform: scale(1.02, 1.02);
+}
+
+.signup-form button:active {
+    transform: scale(.98, .98);
+}
+
+.name-fields {
+    display: flex;
+    column-gap: .5rem;
+}
+
+.name-fields input {
+    flex: 1;
+    width: 5rem;
+}
+
+.close-window-icon {
+    height: 2rem;
+    width: auto;
+    margin-left: auto;
+    margin-right: 1rem;
+    margin-top: 1rem;
+    transition: background-color .3s ease;
+}
+
+.close-window-icon:hover {
+    cursor: pointer;
+    background-color: red;
+}
+
+.message {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.message.error {
+    color: red;
+}
+
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    transition: opacity .5s ease;
+}
+
+.overlay.visible {
+    opacity: 1;
+}

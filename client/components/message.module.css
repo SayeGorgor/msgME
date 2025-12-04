@@ -1,0 +1,23 @@
+.message-wrapper {
+  display: flex;
+  align-items: center;
+  height: 3rem;
+  padding: 0 .5rem;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  padding: .5rem 1rem;
+  border-radius: 1rem;
+}
+
+.user-message {
+  margin-left: auto;
+  background-color: blue;
+  color: white;
+}
+
+.contact-message {
+  background-color: rgb(143, 143, 143);
+}
