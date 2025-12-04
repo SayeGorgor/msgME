@@ -1,0 +1,133 @@
+.body {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 30rem;
+    background-color: white;
+    border-radius: 1rem;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+.body.visible {
+    display: flex;
+}
+
+.add-contact-form {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0;
+}
+
+.add-contact-form input {
+    height: 1.8rem;
+    width: 15rem;
+    padding-left: .5rem;
+    border: 1px solid gray;
+    border-radius: .5rem;
+}
+
+.add-contact-form button {
+    height: 1.8rem;
+    width: 15rem;
+    border: none;
+    border-radius: .5rem;
+    background-color: rgb(0, 183, 255);
+}
+
+.add-contact-form button:hover,
+.add-user-btn:hover {
+    cursor: pointer;
+    background-color: rgb(0, 146, 204);
+}
+
+.add-contact-form button:active,
+.add-user-btn:active {
+    background-color: rgb(0, 111, 155);
+}
+
+/* User Check Section */
+.user-check-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem
+}
+
+.user-check-section button {
+    height: 1.8rem;
+    width: 10rem;
+    border: none;
+    border-radius: .5rem;
+    background-color: rgb(0, 183, 255);
+    margin-bottom: 1rem;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  height: 4rem;
+  padding: 0 .5rem;
+  background-color: lightgray;
+}
+
+.username {
+  margin-left: 1rem;
+}
+
+.pfp-container {
+  height: 3rem;
+  width: 3rem;
+  background-color: gray;
+}
+
+.pfp {
+  height: 100%;
+  width: 100%;
+}
+
+/* MAIN MISC */
+.close-window-icon {
+    height: 2rem;
+    width: auto;
+    margin-left: auto;
+    margin-right: .5rem;
+    margin-top: .5rem;
+    transition: background-color .3s ease;
+}
+
+.close-window-icon:hover {
+    cursor: pointer;
+    background-color: red;
+}
+
+.message {
+    margin-top: .5rem;
+    font-size: 1.2rem;
+}
+
+.message.error {
+    color: red;
+}
+
+/* OVERLAY */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    transition: opacity .5s ease;
+}
+
+.overlay.visible {
+    opacity: 1;
+}

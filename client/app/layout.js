@@ -7,6 +7,7 @@ import Header from "@/components/header";
 import LoginPopup from "@/components/login-popup";
 import SignupPopup from "@/components/signup-popup";
 import IconPopup from "@/components/icon-popup";
+import AddFriendPopup from "@/components/add-friend-popup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
           <LoginPopup />
           <SignupPopup />
           <IconPopup />
+          <AddFriendPopup />
           {children}
         </ReduxProvider>
       </body>

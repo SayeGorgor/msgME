@@ -74,3 +74,23 @@ export const fetchContacts = async() => {
 
     return { success: true, contacts };
 }
+
+export const searchByUsername = async(username) => {
+    const { data, error } = await supabaseAuth.from('users').select('*').eq('username', username).single();
+    if(error) return {success: false, message: 'User Not Found'}
+    console.log('Function Data: ', data);
+
+    return {success: true, data}
+}
+
+export const fetchUsername = async(email) => {
+    const { data, error } = await supabaseAuth
+    .from('users')
+    .select('username')
+    .eq('email', email)
+    .single();
+    
+    if(error) return {success: false, message: error.message};
+
+    return {success: true, username: data.username}
+}

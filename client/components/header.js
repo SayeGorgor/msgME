@@ -1,17 +1,22 @@
 'use client';
 
 import { useDispatch, useSelector } from 'react-redux';
-import styles from './header.module.css';
 import { 
     setShowLoginWindow, 
     setShowSignupWindow,
-    setShowAccountOptionsWindow
+    setShowAccountOptionsWindow,
+    setShowAddContactWindow
 } from '@/lib/redux/slices/headerSlice';
+
+import styles from './header.module.css';
+
+import NotificationIcon from '@/app/(icons)/notification_icon.svg';
 
 export default function Header() {
     //Redux
     const dispatch = useDispatch();
     const isAuthorized = useSelector(state => state.auth.isAuthorized);
+    const user = useSelector(state => state.auth.user);
 
     //Functions
     const summonIconPopup = (e) => {
@@ -24,10 +29,25 @@ export default function Header() {
             {isAuthorized ? 
                 <header className={styles['authorized-header-body']}>
                     <h3>msgME</h3>
-                    <h2>Welcome, Saye</h2>
-                    <div className={styles.icon} onClick={summonIconPopup}>
-                        S
-                    </div>
+                    <h2>Welcome, {user}</h2>
+                    <ul className={styles['user-options-list']}>
+                        <li>
+                            <NotificationIcon className={styles['notification-icon']} />
+                        </li>
+                        <li>
+                            <div 
+                                className={styles['add-friend-btn']} 
+                                onClick={() => dispatch(setShowAddContactWindow(true))}
+                            >
+                                Add Friend
+                            </div>
+                        </li>
+                        <li>
+                            <div className={styles['user-pfp']} onClick={summonIconPopup}>
+                                S
+                            </div>
+                        </li>
+                    </ul>
                 </header>
                 :
                 <header className={styles['unauthorized-header-body']}>

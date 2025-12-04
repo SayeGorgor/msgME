@@ -33,7 +33,7 @@ export default function LoginPopup() {
 
     const attemptLogin = (e) => {
         e.preventDefault();
-        const credentials = {userID, password}
+        const credentials = {userID, password};
         dispatch(login(credentials))
         .then(res => {
             if(res.meta.requestStatus === 'fulfilled') {

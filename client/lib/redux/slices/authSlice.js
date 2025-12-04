@@ -47,7 +47,9 @@ export const authSlice = createSlice({
         isAuthorized: false,
         message: '',
         isLoading: false,
-        hasError: false
+        hasError: false,
+        user: '',
+        session: {}
     },
     reducers: {
         setIsAuthorized: (state, action) => {
@@ -61,6 +63,12 @@ export const authSlice = createSlice({
         },
         setHasError: (state, action) => {
             state.hasError = action.payload;
+        },
+        setUser: (state, action) => {
+            state.user = action.payload;
+        },
+        setSession: (state, action) => {
+            state.session = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -106,6 +114,8 @@ export const authSlice = createSlice({
                 state.hasError = false;
                 state.message = '';
                 state.isAuthorized = false;
+                state.user = '';
+                state.session = {};
             })
             .addCase(logout.rejected, (state, action) => {
                 state.isLoading = true;
@@ -119,7 +129,9 @@ export const {
     setIsAuthorized,
     setMessage,
     setIsLoading,
-    setHasError
+    setHasError,
+    setSession,
+    setUser
 } = authSlice.actions;
 
 export default authSlice.reducer;

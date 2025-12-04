@@ -1,17 +1,17 @@
 'use client';
 
 import { io } from 'socket.io-client';
-import { supabaseAuth } from '../lib/client-actions';
+import { supabaseAuth, fetchContacts, fetchUsername } from '../lib/client-actions';
 import { v4 as uuid } from 'uuid';
+
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import styles from "./page.module.css";
-import DefaultPFP from './(icons)/default_pfp.svg';
-import { setIsAuthorized, setMessage } from "@/lib/redux/slices/authSlice";
-import { setShowAccountOptionsWindow } from "@/lib/redux/slices/headerSlice";
+
+import { useDispatch, useSelector } from "react-redux";
+import { setIsAuthorized, setMessage, setSession, setUser } from "@/lib/redux/slices/authSlice";
+
 import Message from '../components/message';
 import ContactCard from '../components/contact-card';
-import { fetchContacts } from '../lib/client-actions';
 
 export default function Home() {
   const socket = io('http://localhost:8080');
@@ -25,7 +25,6 @@ export default function Home() {
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [userContacts, setUserContacts] = useState([]);
-  const [session, setSession] = useState('');
 
   //Functions
   const sendMessage = (e) => {
@@ -42,10 +41,14 @@ export default function Home() {
       (event, session) => {
         console.log("Auth event:", event, session);
 
-        setSession(session);
+        dispatch(setSession(session));
 
-        //Load contacts
+        //Load contacts and username if valid session
         if (session) {
+          fetchUsername(session.user.email)
+          .then(res => {
+            if(res.success) dispatch(setUser(res.username));
+          });
           fetchContacts()
           .then((res) => {
             console.log('Res: ', res);
