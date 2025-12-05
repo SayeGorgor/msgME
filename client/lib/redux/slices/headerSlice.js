@@ -6,7 +6,8 @@ export const headerSlice = createSlice({
         showLoginWindow: false,
         showSignupWindow: false,
         showAccountOptionsWindow: false,
-        showAddContactWindow: false
+        showAddContactWindow: false,
+        showNotificationsWindow: false
     },
     reducers: {
         setShowLoginWindow: (state, action) => {
@@ -20,6 +21,9 @@ export const headerSlice = createSlice({
         },
         setShowAddContactWindow: (state, action) => {
             state.showAddContactWindow = action.payload;
+        },
+        setShowNotificationsWindow: (state, action) => {
+            state.showNotificationsWindow = action.payload;
         }
     }
 });
@@ -28,7 +32,8 @@ export const {
     setShowLoginWindow,
     setShowSignupWindow,
     setShowAccountOptionsWindow,
-    setShowAddContactWindow
+    setShowAddContactWindow,
+    setShowNotificationsWindow
 } = headerSlice.actions;
 
 export default headerSlice.reducer;

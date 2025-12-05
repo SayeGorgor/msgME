@@ -5,7 +5,8 @@ import {
     setShowLoginWindow, 
     setShowSignupWindow,
     setShowAccountOptionsWindow,
-    setShowAddContactWindow
+    setShowAddContactWindow,
+    setShowNotificationsWindow
 } from '@/lib/redux/slices/headerSlice';
 
 import styles from './header.module.css';
@@ -19,9 +20,14 @@ export default function Header() {
     const user = useSelector(state => state.auth.user);
 
     //Functions
-    const summonIconPopup = (e) => {
+    const openIconPopup = (e) => {
         e.stopPropagation();
         dispatch(setShowAccountOptionsWindow(true));
+    }
+
+    const openNotificationsPopup = (e) => {
+        e.stopPropagation();
+        dispatch(setShowNotificationsWindow(true));
     }
 
     return(
@@ -32,7 +38,10 @@ export default function Header() {
                     <h2>Welcome, {user}</h2>
                     <ul className={styles['user-options-list']}>
                         <li>
-                            <NotificationIcon className={styles['notification-icon']} />
+                            <NotificationIcon 
+                                className={styles['notification-icon']}
+                                onClick={openNotificationsPopup}
+                            />
                         </li>
                         <li>
                             <div 
@@ -43,7 +52,7 @@ export default function Header() {
                             </div>
                         </li>
                         <li>
-                            <div className={styles['user-pfp']} onClick={summonIconPopup}>
+                            <div className={styles['user-pfp']} onClick={openIconPopup}>
                                 S
                             </div>
                         </li>

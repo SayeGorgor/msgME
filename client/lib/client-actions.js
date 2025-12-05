@@ -94,3 +94,65 @@ export const fetchUsername = async(email) => {
 
     return {success: true, username: data.username}
 }
+
+const fetchUserID = async(username) => {
+    const { data, error } = await supabaseAuth
+        .from('users')
+        .select('id')
+        .eq('username', username)
+        .single();
+
+    if(error) return {success: false, message: error.message}
+
+    return {success: true, data: data.id};
+}
+
+const verifyNewRequest = async(senderID, receiverID) => {
+    //Check if user has already sent out this request
+    const { error:userDuplicateError } = await supabaseAuth
+        .from('requests')
+        .select('*')
+        .eq('sender_id', senderID)
+        .eq('receiver_id', receiverID)
+        .single();
+
+    if(!userDuplicateError) return {success: false, error: 'Request Already Sent'};
+
+    //Check if the request receiver has already sent out a friend request
+    const { error:receiverDuplicateError } = await supabaseAuth
+        .from('requests')
+        .select('*')
+        .eq('sender_id', receiverID)
+        .eq('receiver_id', senderID)
+        .single();
+
+    if(!receiverDuplicateError) return {success: false, error: 'User Has Already Requested You'};
+
+    return {success: true};
+}
+
+export const insertRequest = async(requestInfo) => {
+    const { senderID, username } = requestInfo;
+
+    //Get receiver id from username
+    const { data:receiverID } = await fetchUserID(username);
+
+    //Verify sender and receiver ids are different(not sending request to self)
+    if(senderID === receiverID) return {success: false, error: 'Cannot Send Request to Self'};
+
+    //Verify request doesn't already exist
+    const newRequestCheck = await verifyNewRequest(senderID, receiverID);
+    if(!newRequestCheck.success) return {success: false, error: newRequestCheck.error};
+    
+    //Insert request
+    const { error } = await supabaseAuth
+        .from('requests')
+        .insert({
+            'sender_id': senderID,
+            'receiver_id': receiverID
+        })
+        .single();
+    if(error) return {success: false, error: error.message};
+
+    return {success: true};
+}

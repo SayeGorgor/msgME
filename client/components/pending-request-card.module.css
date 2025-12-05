@@ -1,0 +1,56 @@
+.body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-info p {
+    margin-left: .5rem;
+    font-weight: bolder;
+}
+
+.pfp-container {
+  height: 3rem;
+  width: 3rem;
+  margin-left: 1rem;
+  background-color: gray;
+}
+
+.pfp {
+  height: 100%;
+  width: 100%;
+}
+
+.option-icons-list {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin-right: .3rem;
+}
+
+.accept-icon {
+    height: 1.5rem;
+    width: auto;
+}
+
+.accept-icon:hover {
+    cursor: pointer;
+    color: blue;
+}
+
+.reject-icon {
+    height: 2rem;
+    width: auto;
+}
+
+.reject-icon:hover {
+    cursor: pointer;
+    color: red;
+}

@@ -9,7 +9,7 @@ import { setShowAddContactWindow } from '@/lib/redux/slices/headerSlice';
 
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
-import { setHasError, setMessage } from '@/lib/redux/slices/authSlice';
+import { setHomeMessage, setHasHomeError, sendRequest } from '@/lib/redux/slices/homeSlice';
 
 export default function AddFriendPopup() {
     //Use States
@@ -21,32 +21,41 @@ export default function AddFriendPopup() {
     //Redux
     const dispatch = useDispatch();
     const showAddContactWindow = useSelector(state => state.header.showAddContactWindow);
-    const message = useSelector(state => state.auth.message);
-    const hasError = useSelector(state => state.auth.hasError);
+    const session = useSelector(state => state.auth.session);
+    const hasError = useSelector(state => state.home.hasError);
+    const homeMessage = useSelector(state => state.home.message);
 
     //Functions
     const closeWindow = () => {
         dispatch(setShowAddContactWindow(false));
         setUsername('');
         setUserFound(false);
-        dispatch(setHasError(false));
-        dispatch(setMessage(''));
+        dispatch(setHasHomeError(false));
+        dispatch(setHomeMessage(''));
     }
 
     const lookupUser = async(e) => {
         e.preventDefault();
         setUserFound(false);
-        dispatch(setHasError(false));
-        dispatch(setMessage('Searching...'));
+        dispatch(setHasHomeError(false));
+        dispatch(setHomeMessage('Searching...'));
         const res = await searchByUsername(username);
         console.log('New Res: ', res);
         if(!res.success) {
-            dispatch(setMessage(res.message));
-            dispatch(setHasError(true));
+            dispatch(setHomeMessage(res.message));
+            dispatch(setHasHomeError(true));
         } else {
-            dispatch(setMessage(''));
+            dispatch(setHomeMessage(''));
             setFoundUsername(res.data.username);
             setUserFound(true);
+        }
+    }
+
+    const sendFriendRequest = () => {
+        if(session) {
+            const senderID = session.user.id;
+            const requestInfo = {senderID, username: foundUsername};
+            dispatch(sendRequest(requestInfo));
         }
     }
 
@@ -57,10 +66,10 @@ export default function AddFriendPopup() {
                     className={styles['close-window-icon']} 
                     onClick={closeWindow}
                 />
-                <h2>Add Contact</h2>
-                {message && 
+                <h2>Add Friend</h2>
+                {homeMessage && 
                     <p className={`${styles.message} ${hasError ? styles.error : ''}`}>
-                        {message}
+                        {homeMessage}
                     </p>
                 }
                 <form className={styles['add-contact-form']} onSubmit={lookupUser}>
@@ -84,7 +93,10 @@ export default function AddFriendPopup() {
                                 <h4>{foundUsername}</h4>
                             </div>
                         </div>
-                        <button className={styles['add-user-btn']}>Yes, Send Request!</button>
+                        <button 
+                            className={styles['add-user-btn']}
+                            onClick={sendFriendRequest}
+                        >Yes, Send Request!</button>
                     </div>
                 )}
             </div>

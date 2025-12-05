@@ -1,0 +1,30 @@
+.body {
+    display: none;
+    position: fixed;
+    top: 3rem;
+    right: 11rem;
+    padding-top: 1rem;
+    width: 20rem;
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.body.visible {
+    display: flex;
+}
+
+.pending-requests-section {
+    width: 100%;
+}
+
+.pending-requests-section h2 {
+    margin-bottom: 1rem;
+    margin-left: 1rem;
+}
+
+.pending-requests-list {
+    list-style: none;
+    width: 100%;
+}
+
