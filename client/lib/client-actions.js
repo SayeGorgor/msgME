@@ -63,12 +63,10 @@ export const supaLogout = async() => {
 export const fetchContacts = async() => {
     let contacts = [];
     const { data, error } = await supabaseAuth.from('contacts').select('*');
-    console.log('Retrieved data: ', data);
     if(error) return { success: false, message: error.message };
 
     for(let row of data) {
         const { data:usernameData } = await supabaseAuth.from('users').select('username').eq('id', row['contact_id']).single();
-        console.log('Username Data: ', usernameData);
         contacts.push({username: usernameData.username, id: row['contact_id']});
     }
 
@@ -140,6 +138,14 @@ export const insertRequest = async(requestInfo) => {
     //Verify sender and receiver ids are different(not sending request to self)
     if(senderID === receiverID) return {success: false, error: 'Cannot Send Request to Self'};
 
+    //Verify user isnt already in friends list
+    const { data } = await supabaseAuth
+        .from('contacts')
+        .select('*')
+        .eq('contact_id', receiverID)
+        .single();  
+    if(data) return {success: false, error: 'You Are Already Friends With this User!'};
+    
     //Verify request doesn't already exist
     const newRequestCheck = await verifyNewRequest(senderID, receiverID);
     if(!newRequestCheck.success) return {success: false, error: newRequestCheck.error};
@@ -153,6 +159,72 @@ export const insertRequest = async(requestInfo) => {
         })
         .single();
     if(error) return {success: false, error: error.message};
+
+    return {success: true};
+}
+
+export const fetchFriendRequests = async(id) => {
+    //Fetch incoming friend requests
+    const { data:incomingRequests , error:incomingRequestsError } = await supabaseAuth
+        .from('requests')
+        .select('id, sender_id')
+        .eq('receiver_id', id);
+        
+    if(incomingRequestsError) return {error: incomingRequestsError.message};
+
+    //Fetch outgoing friend requests
+    const { data:outgoingRequests , error:outgoingRequestsError } = await supabaseAuth
+        .from('requests')
+        .select('id, receiver_id')
+        .eq('sender_id', id);
+        
+    if(outgoingRequestsError) return {error: outgoingRequestsError.message}
+    
+    return {data: {outgoingRequests, incomingRequests}};
+}
+
+export const fetchUsernameByID = async(id) => {
+    const { data, error } = await supabaseAuth
+        .from('users')
+        .select('username')
+        .eq('id', id)
+        .single();
+    
+    if(error) return {error: error.message};
+
+    return {data: {username: data.username}};
+}
+
+export const supaDecideOnRequest = async(decisionInfo) => {
+    const { decision, senderID, receiverID, requestID } = decisionInfo;
+
+    //Add friend if accepted
+    if(decision === 'accept') {
+        const { error: firstEntryError } = await supabaseAuth
+            .from('contacts')
+            .insert({
+                'user_id': senderID,
+                'contact_id': receiverID
+            })
+            .single();
+
+        const { error: secondEntryError } = await supabaseAuth
+            .from('contacts')
+            .insert({
+                'user_id': receiverID,
+                'contact_id': senderID
+            })
+            .single();
+        if(firstEntryError || secondEntryError) return {success: false, error: 'Error Adding Friend'}
+    }
+
+    //Delete request from requests table
+    const { error } = await supabaseAuth
+        .from('requests')
+        .delete('*')
+        .eq('id', requestID)
+        .single();
+    if(error) return {error: 'Error Deleting User from DB'};
 
     return {success: true};
 }

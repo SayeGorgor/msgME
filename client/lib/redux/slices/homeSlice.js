@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { insertRequest } from '@/lib/client-actions';
+import { insertRequest, fetchFriendRequests, fetchUsernameByID, supaDecideOnRequest } from '@/lib/client-actions';
 import { setHasError } from './authSlice';
 
 export const sendRequest = createAsyncThunk(
@@ -12,11 +12,64 @@ export const sendRequest = createAsyncThunk(
             return thunkAPI.rejectWithValue('Error Sending Request');
         }
     }
+);
+
+export const loadFriendRequests = createAsyncThunk(
+    'home/loadFriendRequests',
+    async(id, thunkAPI) => {
+        let incomingFriendRequests = [];
+        let outgoingFriendRequests = [];
+
+        //Fetch incoming and outgoing requests
+        const { error, data } = await fetchFriendRequests(id);
+        if(error) return thunkAPI.rejectWithValue(error);
+
+        //Filter through incoming requests to grab username and add to list
+        for(let request of data.incomingRequests) {
+            console.log('Sender ID: ', request['sender_id']);
+            const { data, error } = await fetchUsernameByID(request['sender_id']);
+            if(error) {
+                console.log('Filtering Error In Incoming: ', error);
+                return thunkAPI.rejectWithValue(error);
+            }
+            incomingFriendRequests.push({
+                id: request.id, 
+                senderUsername: data.username,
+                senderID: request['sender_id']
+            });
+        }
+
+        //Filter through outgoing requests to grab username and add to list
+        for(let request of data.outgoingRequests) {
+            const { data, error } = await fetchUsernameByID(request['receiver_id']);
+            if(error) return thunkAPI.rejectWithValue(error);
+            outgoingFriendRequests.push({id: request.id, receiverUsername: data.username});
+        }
+
+        return {incomingFriendRequests, outgoingFriendRequests};
+    }
+);
+
+export const decideOnRequest = createAsyncThunk(
+    'home/decideOnRequest',
+    async(decisionInfo, thunkAPI) => {
+        const { requestID } = decisionInfo;
+        try {
+            const { error } = await supaDecideOnRequest(decisionInfo);
+            if(error) return thunkAPI.rejectWithValue(error);
+            return requestID;
+        } catch(error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
 )
+
 const homeSlice = createSlice({
     name: 'home',
     initialState: {
         chattingWith: '',
+        incomingFriendRequests: [],
+        outgoingFriendRequests: [],
         isLoading: false,
         hasError: false,
         message: ''
@@ -42,9 +95,43 @@ const homeSlice = createSlice({
             .addCase(sendRequest.fulfilled, state => {
                 state.isLoading = false;
                 state.hasError = false;
-                state.message = '';
+                state.message = 'Request Sent!';
             })
             .addCase(sendRequest.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.message = action.payload;
+            })
+            .addCase(loadFriendRequests.pending, state => {
+                state.isLoading = true;
+                state.hasError = false;
+                state.message = 'Loading Requests...';
+            })
+            .addCase(loadFriendRequests.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.hasError = false;
+                state.message = '';
+                state.incomingFriendRequests = action.payload.incomingFriendRequests;
+                state.outgoingFriendRequests = action.payload.outgoingFriendRequests;
+            })
+            .addCase(loadFriendRequests.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.message = action.payload;
+            })
+            .addCase(decideOnRequest.pending, state => {
+                state.isLoading = true;
+                state.hasError = false;
+                state.message = '';
+            })
+            .addCase(decideOnRequest.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.hasError = false;
+                state.message = '';
+                state.incomingFriendRequests = state.incomingFriendRequests
+                    .filter(request => request.id !== action.payload);
+            })
+            .addCase(decideOnRequest.rejected, (state, action) => {
                 state.isLoading = false;
                 state.hasError = true;
                 state.message = action.payload;

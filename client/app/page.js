@@ -12,14 +12,20 @@ import { setIsAuthorized, setMessage, setSession, setUser } from "@/lib/redux/sl
 
 import Message from '../components/message';
 import ContactCard from '../components/contact-card';
+import { loadFriendRequests, setChattingWith } from '@/lib/redux/slices/homeSlice';
 
 export default function Home() {
   const socket = io('http://localhost:8080');
   
   //Redux
   const dispatch = useDispatch();
+
   const isAuthorized = useSelector(state => state.auth.isAuthorized);
+  const user = useSelector(state => state.auth.user);
+
   const chattingWith = useSelector(state => state.home.chattingWith);
+  const incomingFriendRequests = useSelector(state => state.home.incomingFriendRequests);
+  const outgoingFriendRequests = useSelector(state => state.home.outgoingFriendRequests);
 
   //States
   const [newMessage, setNewMessage] = useState('');
@@ -43,20 +49,23 @@ export default function Home() {
 
         dispatch(setSession(session));
 
-        //Load contacts and username if valid session
+        //Load user info if valid session
         if (session) {
+          //Fetch username
           fetchUsername(session.user.email)
           .then(res => {
             if(res.success) dispatch(setUser(res.username));
           });
+          //Fetch contacts
           fetchContacts()
           .then((res) => {
-            console.log('Res: ', res);
             if(res.success) {
               setUserContacts(res.contacts);
             }
             dispatch(setIsAuthorized(true));
           });
+          //Fetch friend requests
+          dispatch(loadFriendRequests(session.user.id));
         } else {
           dispatch(setIsAuthorized(false));
         }
@@ -86,10 +95,12 @@ export default function Home() {
   //Load contacts
   useEffect(() => {
     const res = fetchContacts();
-    if(res.success) {
-      console.log()
-    }
   }, []);
+
+  //Clear Chatting With On Logout
+  useEffect(() => {
+    if(!user) dispatch(setChattingWith(''));
+  }, [user]);
 
   return (
     <div className={styles.page}>

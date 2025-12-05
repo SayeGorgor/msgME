@@ -1,9 +1,9 @@
 .body {
     display: none;
+    flex-direction: column;
     position: fixed;
     top: 3rem;
     right: 11rem;
-    padding-top: 1rem;
     width: 20rem;
     background-color: white;
     border-radius: 1rem;
@@ -15,6 +15,8 @@
 }
 
 .pending-requests-section {
+    display: flex;
+    flex-direction: column;
     width: 100%;
 }
 
@@ -28,3 +30,16 @@
     width: 100%;
 }
 
+.close-window-icon {
+    height: 2rem;
+    width: auto;
+    margin-left: auto;
+    margin-right: .5rem;
+    margin-top: .5rem;
+    transition: background-color .3s ease;
+}
+
+.close-window-icon:hover {
+    cursor: pointer;
+    background-color: red;
+}
