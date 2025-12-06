@@ -86,10 +86,13 @@ export default function Home() {
   useEffect(() => {
     socket.on('received_message', (msg) => {
       console.log('Socket Message: ', msg);
-      setMessages([...messages, {fromUser: false, id: uuid(), content: msg}]);
+      setMessages(prev => [...prev, {fromUser: false, id: uuid(), content: msg}]);
     });
 
-    return () => socket.off();
+    return () => {
+      socket.off();
+      socket.close();
+    }
   }, []);
 
   //Load contacts
