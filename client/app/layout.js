@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import SocketProvider from "@/lib/socket/socket-provider";
 import ReduxProvider from "@/lib/redux/redux-provider";
 
 import Header from "@/components/header";
@@ -29,15 +30,17 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ReduxProvider>
-          <Header />
-          <LoginPopup />
-          <SignupPopup />
-          <IconPopup />
-          <AddFriendPopup />
-          <NotificationsPopup />
-          {children}
-        </ReduxProvider>
+        <SocketProvider>
+          <ReduxProvider>
+            <Header />
+            <LoginPopup />
+            <SignupPopup />
+            <IconPopup />
+            <AddFriendPopup />
+            <NotificationsPopup />
+            {children}
+          </ReduxProvider>
+        </SocketProvider>
       </body>
     </html>
   );

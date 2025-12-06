@@ -53,6 +53,8 @@
   flex-direction: column;
   list-style: none;
   padding: 0;
+  overflow-y: auto;
+  max-height: calc(100vh - 13rem);
 }
 
 /* CONTACT BANNER */

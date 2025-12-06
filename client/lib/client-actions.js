@@ -1,5 +1,6 @@
 'use client';
 
+import { v4 as uuid } from 'uuid';
 import { createClient } from "@supabase/supabase-js";
 import { supaInsert, verifyNewUser } from "./server-actions";
 
@@ -60,14 +61,35 @@ export const supaLogout = async() => {
     await supabaseAuth.auth.signOut();
 }
 
-export const fetchContacts = async() => {
+export const fetchContacts = async(userID) => {
     let contacts = [];
     const { data, error } = await supabaseAuth.from('contacts').select('*');
     if(error) return { success: false, message: error.message };
 
     for(let row of data) {
-        const { data:usernameData } = await supabaseAuth.from('users').select('username').eq('id', row['contact_id']).single();
-        contacts.push({username: usernameData.username, id: row['contact_id']});
+        const { data:usernameData, error:usernameError } = await supabaseAuth
+            .from('users')
+            .select('username')
+            .eq('id', row['contact_id'])
+            .single();
+        if(usernameError) return({success: false, message: error.message});
+
+        //Fetch conversation id
+        const { data:conversationID, error:rpcError } = await supabaseAuth.rpc('fetch_conversation_id',
+            {
+                arg_user_id: userID,
+                arg_contact_id: row['contact_id']
+            }
+        )
+        if(rpcError) {
+            console.log('RPC Error: ', rpcError.message);
+            return {success: false, error: rpcError.message};
+        }
+        contacts.push({
+            username: usernameData.username, 
+            id: row['contact_id'],
+            conversationID
+        });
     }
 
     return { success: true, contacts };
@@ -216,6 +238,10 @@ export const supaDecideOnRequest = async(decisionInfo) => {
             })
             .single();
         if(firstEntryError || secondEntryError) return {success: false, error: 'Error Adding Friend'}
+
+        //Create conversation
+        const { success, error:conversationError } = await createConversation(senderID, receiverID);
+        if(!success) return {success: false, error: conversationError};
     }
 
     //Delete request from requests table
@@ -224,7 +250,67 @@ export const supaDecideOnRequest = async(decisionInfo) => {
         .delete('*')
         .eq('id', requestID)
         .single();
-    if(error) return {error: 'Error Deleting User from DB'};
+    if(error) return {success: false, error: 'Error Deleting User from DB'};
 
     return {success: true};
+}
+
+const createConversation = async(senderID, receiverID) => {
+    const conversationID = uuid();
+
+    //Create new conversation
+    const { error:convoError } = await supabaseAuth
+        .from('conversations')
+        .insert({
+            id: conversationID
+        })
+        .single();
+    if(convoError) return {success: false, error: convoError.message};
+
+    //Add sender to conversation
+    const { error:senderError } = await supabaseAuth
+        .from('conversation_participants')
+        .insert({
+            'conversation_id': conversationID,
+            'user_id': senderID
+        })
+        .single();
+    if(senderError) return {success: false, error: senderError.message};
+
+    //Add receiver to conversation
+    const { error:receiverError } = await supabaseAuth
+        .from('conversation_participants')
+        .insert({
+            'conversation_id': conversationID,
+            'user_id': receiverID
+        })
+        .single();
+    if(receiverError) return {success: false, error: receiverError.message};
+
+    return {success: true};
+}
+
+export const supaInsertNewMessage = async(message) => {
+    const { error } = await supabaseAuth
+        .from('messages')
+        .insert({
+            id: message.id,
+            'conversation_id': message.conversationID,
+            'sender_id': message.senderID,
+            content: message.content
+        })
+        .single();
+    if(error) return {success: false, error: error.message}
+
+    return {success: true};
+}
+
+export const fetchMessages = async(conversationID) => {
+    const { data, error } = await supabaseAuth
+        .from('messages')
+        .select('id, sender_id, content')
+        .eq('conversation_id', conversationID);
+    if(error) return {success: false, error: error.message};
+
+    return {success: true, data};
 }

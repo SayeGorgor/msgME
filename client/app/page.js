@@ -4,28 +4,30 @@ import { io } from 'socket.io-client';
 import { supabaseAuth, fetchContacts, fetchUsername } from '../lib/client-actions';
 import { v4 as uuid } from 'uuid';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import styles from "./page.module.css";
 
 import { useDispatch, useSelector } from "react-redux";
 import { setIsAuthorized, setMessage, setSession, setUser } from "@/lib/redux/slices/authSlice";
 
-import Message from '../components/message';
+import MessageCard from '../components/message-card';
 import ContactCard from '../components/contact-card';
-import { loadFriendRequests, setChattingWith } from '@/lib/redux/slices/homeSlice';
+import { addMessage, clearMessageLog, insertNewMessage, loadFriendRequests, setChattingWith, setMessageLog } from '@/lib/redux/slices/homeSlice';
+import { SocketContext } from '@/lib/socket/socket';
 
 export default function Home() {
-  const socket = io('http://localhost:8080');
+  const socket = useContext(SocketContext);
   
   //Redux
   const dispatch = useDispatch();
 
   const isAuthorized = useSelector(state => state.auth.isAuthorized);
   const user = useSelector(state => state.auth.user);
+  const session = useSelector(state => state.auth.session);
 
   const chattingWith = useSelector(state => state.home.chattingWith);
-  const incomingFriendRequests = useSelector(state => state.home.incomingFriendRequests);
-  const outgoingFriendRequests = useSelector(state => state.home.outgoingFriendRequests);
+  const currentConversationID = useSelector(state => state.home.currentConversationID);
+  const messageLog = useSelector(state => state.home.messageLog);
 
   //States
   const [newMessage, setNewMessage] = useState('');
@@ -35,15 +37,22 @@ export default function Home() {
   //Functions
   const sendMessage = (e) => {
     e.preventDefault();
-    socket.emit('send_message', newMessage);
-    setMessages([...messages, {fromUser: true, content: newMessage, id: uuid()}]);
+    const id = uuid();
+    const message = {
+      id,
+      conversationID: currentConversationID,
+      senderID: session?.user?.id,
+      content: newMessage
+    }
+    dispatch(insertNewMessage(message));
+    socket.emit('send_message', message);
     setNewMessage('');
   }
 
   //Effects
   //Grab session on load and auth change
   useEffect(() => {
-    const { data: listener } = supabaseAuth.auth.onAuthStateChange(
+    const { data:listener } = supabaseAuth.auth.onAuthStateChange(
       (event, session) => {
         console.log("Auth event:", event, session);
 
@@ -57,7 +66,7 @@ export default function Home() {
             if(res.success) dispatch(setUser(res.username));
           });
           //Fetch contacts
-          fetchContacts()
+          fetchContacts(session.user.id)
           .then((res) => {
             if(res.success) {
               setUserContacts(res.contacts);
@@ -84,14 +93,13 @@ export default function Home() {
 
   //Update message log when new message is received
   useEffect(() => {
-    socket.on('received_message', (msg) => {
-      console.log('Socket Message: ', msg);
-      setMessages(prev => [...prev, {fromUser: false, id: uuid(), content: msg}]);
+    socket.on('received_message', (messageData) => {
+      console.log('Socket Message: ', messageData);
+      dispatch(addMessage(messageData));
     });
 
     return () => {
       socket.off();
-      socket.close();
     }
   }, []);
 
@@ -102,7 +110,10 @@ export default function Home() {
 
   //Clear Chatting With On Logout
   useEffect(() => {
-    if(!user) dispatch(setChattingWith(''));
+    if(!user) {
+      dispatch(setChattingWith(''));
+      dispatch(clearMessageLog());
+    }
   }, [user]);
 
   return (
@@ -116,7 +127,8 @@ export default function Home() {
                 <li key={contact.id}>
                   <ContactCard 
                     username={contact.username} 
-                    latestMessage={'This is our lastest message'} 
+                    latestMessage={'This is our lastest message'}
+                    conversationID={contact.conversationID} 
                   />
                 </li>
               ))}
@@ -128,9 +140,13 @@ export default function Home() {
             </div>
             <div className={styles['messaging-section-texts-section']}>
               <ul className={styles['message-thread']}>
-                {messages.map(message =>(
+                {messageLog.map(message =>(
                   <li key={message.id}>
-                    <Message fromUser={message.fromUser} content={message.content} />
+                    <MessageCard 
+                      senderID={message['sender_id']} 
+                      content={message.content} 
+                      id={message.id} 
+                    />
                   </li>
                 ))}
               </ul>

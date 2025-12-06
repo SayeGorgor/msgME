@@ -14,8 +14,19 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     socket.on('send_message', (message) => {
-        console.log(message);
-        socket.broadcast.emit('received_message', message);
+        const { id, senderID, content } = message;
+        const messageData = { id, senderID, content }
+        console.log('Message Data: ', message);
+        socket.to(message.conversationID).emit('received_message', messageData);
+    });
+
+    socket.on('join_room', (conversationID) => {
+        console.log('Joined room: ', conversationID);
+        socket.join(conversationID);
+    });
+
+    socket.on('leave_room', (conversationID) => {
+        socket.leave(conversationID);
     })
 })
 

@@ -1,6 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { insertRequest, fetchFriendRequests, fetchUsernameByID, supaDecideOnRequest } from '@/lib/client-actions';
-import { setHasError } from './authSlice';
+import { 
+    insertRequest, 
+    fetchFriendRequests, 
+    fetchUsernameByID, 
+    supaDecideOnRequest,
+    supaInsertNewMessage, 
+    fetchMessages
+} from '@/lib/client-actions';
+import { setHasError, setMessage } from './authSlice';
 
 export const sendRequest = createAsyncThunk(
     'home/sendRequest',
@@ -62,7 +69,37 @@ export const decideOnRequest = createAsyncThunk(
             return thunkAPI.rejectWithValue(error);
         }
     }
-)
+);
+
+export const insertNewMessage = createAsyncThunk(
+    'home/insertNewMessage',
+    async(message, thunkAPI) => {
+        const { content, senderID, id } = message;
+        try {
+            const { success, error } = await supaInsertNewMessage(message);
+            if(!success) return thunkAPI.rejectWithValue(error);
+
+            console.log('Returned Shit: ', content, senderID, id);
+            return { content, id, 'sender_id': senderID };
+        } catch(error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const loadMessages = createAsyncThunk(
+    'home/loadMessages',
+    async(conversationID, thunkAPI) => {
+        try {
+            const { success, error, data } = await fetchMessages(conversationID);
+            if(!success) return thunkAPI.rejectWithValue(error);
+
+            return data;
+        } catch(error) {
+            thunkAPI.rejectWithValue(error);
+        }
+    }
+);
 
 const homeSlice = createSlice({
     name: 'home',
@@ -70,6 +107,8 @@ const homeSlice = createSlice({
         chattingWith: '',
         incomingFriendRequests: [],
         outgoingFriendRequests: [],
+        currentConversationID: '',
+        messageLog: [],
         isLoading: false,
         hasError: false,
         message: ''
@@ -83,6 +122,15 @@ const homeSlice = createSlice({
         },
         setHasHomeError: (state, action) => {
             state.hasError = action.payload;
+        },
+        setCurrentConversationID: (state, action) => {
+            state.currentConversationID = action.payload;
+        },
+        clearMessageLog: (state, action) => {
+            state.messageLog = [];
+        },
+        addMessage: (state, action) => {
+            state.messageLog = [...state.messageLog, action.payload];
         }
     },
     extraReducers: (builder) => {
@@ -136,9 +184,48 @@ const homeSlice = createSlice({
                 state.hasError = true;
                 state.message = action.payload;
             })
+            .addCase(insertNewMessage.pending, state => {
+                state.isLoading = true;
+                state.hasError = false;
+                state.message = '';
+            })
+            .addCase(insertNewMessage.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.hasError = false;
+                state.message = '';
+                state.messageLog = [...state.messageLog, action.payload];
+            })
+            .addCase(insertNewMessage.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.message = action.payload;
+            })
+            .addCase(loadMessages.pending, state => {
+                state.isLoading = true;
+                state.hasError = false;
+                state.message = 'Loading Messages...';
+            })
+            .addCase(loadMessages.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.hasError = false;
+                state.message = '';
+                state.messageLog = action.payload;
+            })
+            .addCase(loadMessages.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.message = action.payload;
+            })
     }
 });
 
-export const { setChattingWith, setHomeMessage, setHasHomeError } = homeSlice.actions;
+export const { 
+    setChattingWith, 
+    setHomeMessage, 
+    setHasHomeError,
+    setCurrentConversationID,
+    clearMessageLog,
+    addMessage
+} = homeSlice.actions;
 
 export default homeSlice.reducer;
