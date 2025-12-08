@@ -50,10 +50,10 @@ export default function ManageAccountPopup() {
     //Reset data on when window is closed
     useEffect(() => {
         if(accountData) {
-            setFirstName(accountData['first_name']);
-            setLastName(accountData['last_name']);
-            setEmail(accountData.email);
-            setUsername(accountData.username);
+            setFirstName(accountData['first_name'] || '');
+            setLastName(accountData['last_name'] || '');
+            setEmail(accountData.email || '');
+            setUsername(accountData.username || '');
         }
     }, [showAccountWindow]);
 
@@ -125,7 +125,7 @@ export default function ManageAccountPopup() {
                             type='email'
                             name='email'
                             value={email}
-                            disabled={session ? true : false}
+                            disabled
                         />
                     </label>
                     <button type='submit' disabled={!isEditing}>Save Changes</button>

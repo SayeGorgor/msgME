@@ -1,8 +1,44 @@
+/* ANIMATIONS */
+@keyframes contactMessageSlideIn {
+  from{transform: translateX(0);}
+  to{transform: translateX(4.7rem);}
+}
+
+@keyframes contactMessageSlideOut {
+  from{transform: translateX(4.7rem);}
+  to{transform: translateX(0);}
+}
+
+@keyframes userMessageSlideIn {
+  from{transform: translateX(0);}
+  to{transform: translateX(-4.7rem);}
+}
+
+@keyframes userMessageSlideOut {
+  from{transform: translateX(-4.7rem);}
+  to{transform: translateX(0);}
+}
+
 .message-wrapper {
+  display: flex;
+  position: relative;
+  align-items: center;
+}
+
+.message-body {
   display: flex;
   align-items: center;
   height: 3rem;
   padding: 0 .5rem;
+  z-index: 2;
+}
+
+.message-body:hover {
+  cursor: pointer;
+}
+
+.message-body.user-message {
+  margin-left: auto;
 }
 
 .message {
@@ -12,12 +48,60 @@
   border-radius: 1rem;
 }
 
-.user-message {
-  margin-left: auto;
+.message.user-message {
   background-color: blue;
   color: white;
 }
 
-.contact-message {
+.message.contact-message {
   background-color: rgb(179, 179, 179);
+}
+
+.timestamp {
+  position: absolute;
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+
+.timestamp.time-visible {
+  opacity: 1;
+}
+
+.timestamp.user-message {
+  display: block;
+  right: .5rem;
+  /* right: 3%; */
+}
+
+.timestamp.contact-message {
+  display: block;
+  margin-left: .5rem !important;
+}
+
+.timestamp.visible {
+  opacity: 1;
+}
+
+.contact-message.visible {
+  transform: translateX(4.7rem);
+  animation: contactMessageSlideIn .5s ease;
+}
+
+.contact-message.hidden {
+  transform: translateX(0);
+  animation: contactMessageSlideOut .5s ease;
+}
+
+.user-message.visible {
+  transform: translateX(-4.7rem);
+  animation: userMessageSlideIn .5s ease;
+}
+
+.user-message.hidden {
+  transform: translateX(0);
+  animation: userMessageSlideOut .5s ease;
+}
+
+.no-animation {
+  animation: none !important;
 }

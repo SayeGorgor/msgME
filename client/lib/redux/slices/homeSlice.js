@@ -124,6 +124,7 @@ const homeSlice = createSlice({
         outgoingFriendRequests: [],
         currentConversationID: '',
         messageLog: [],
+        preventAnimation: true,
         isLoading: false,
         hasError: false,
         message: ''
@@ -149,6 +150,9 @@ const homeSlice = createSlice({
         },
         setIsHomeLoading: (state, action) => {
             state.isLoading = action.payload;
+        },
+        setPreventAnimation: (state, action) => {
+            state.preventAnimation = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -266,7 +270,8 @@ export const {
     setCurrentConversationID,
     clearMessageLog,
     addMessage,
-    setIsHomeLoading
+    setIsHomeLoading,
+    setPreventAnimation
 } = homeSlice.actions;
 
 export default homeSlice.reducer;

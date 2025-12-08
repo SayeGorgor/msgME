@@ -147,6 +147,7 @@ export default function Home() {
                           senderID={message['sender_id']} 
                           content={message.content} 
                           id={message.id} 
+                          timestamp={message['created_at']}
                         />
                       </li>
                     ))}

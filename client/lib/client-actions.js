@@ -346,7 +346,7 @@ export const supaInsertNewMessage = async(message) => {
 export const fetchMessages = async(conversationID) => {
     const { data, error } = await supabaseAuth
         .from('messages')
-        .select('id, sender_id, content')
+        .select('id, sender_id, content, created_at')
         .eq('conversation_id', conversationID);
     if(error) return {success: false, error: error.message};
 
