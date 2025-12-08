@@ -39,14 +39,20 @@ export const supaLogin = async(userID, password) => {
     console.log('isEmail: ', isEmail);
     //Handle log in as normal if userID is an email
     if(isEmail) {
-        const {error} = await supabaseAuth.auth.signInWithPassword({email: userID, password});
+        const {error} = await supabaseAuth
+            .auth
+            .signInWithPassword({email: userID, password});
         if(error) return {success: false, message: error.message};
 
         return {success: true};
     }
 
     //Grab email using userID
-    const res = await supabaseAuth.from('users').select('email').eq('username', userID).single();
+    const res = await supabaseAuth
+        .from('users')
+        .select('email')
+        .eq('username', userID)
+        .single();
     const email = res.email;
     //Fail if email isnt found
     if(!email) return {success: false, message: 'Username not found'};
@@ -59,6 +65,17 @@ export const supaLogin = async(userID, password) => {
 
 export const supaLogout = async() => {
     await supabaseAuth.auth.signOut();
+}
+
+const fetchConversationInfo = async(conversationID) => {
+    const { data, error } = await supabaseAuth
+        .from('conversations')
+        .select('last_message_at, last_message')
+        .eq('id', conversationID)
+        .single();
+    if(error) return {success: false, error: error.message};
+
+    return {success: true, data};
 }
 
 export const fetchContacts = async(userID) => {
@@ -85,18 +102,26 @@ export const fetchContacts = async(userID) => {
             console.log('RPC Error: ', rpcError.message);
             return {success: false, error: rpcError.message};
         }
+        const { data: conversationData, error } = await fetchConversationInfo(conversationID);
+        if(error) return {success:false, error}
+        
         contacts.push({
+            ...conversationData,
             username: usernameData.username, 
             id: row['contact_id'],
             conversationID
         });
     }
 
-    return { success: true, contacts };
+    return { success: true, data: contacts };
 }
 
 export const searchByUsername = async(username) => {
-    const { data, error } = await supabaseAuth.from('users').select('*').eq('username', username).single();
+    const { data, error } = await supabaseAuth
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .single();
     if(error) return {success: false, message: 'User Not Found'}
     console.log('Function Data: ', data);
 
@@ -166,7 +191,7 @@ export const insertRequest = async(requestInfo) => {
         .select('*')
         .eq('contact_id', receiverID)
         .single();  
-    if(data) return {success: false, error: 'You Are Already Friends With this User!'};
+    if(data) return {success: false, error: 'You Are Already Friends With This User!'};
     
     //Verify request doesn't already exist
     const newRequestCheck = await verifyNewRequest(senderID, receiverID);
@@ -291,7 +316,7 @@ const createConversation = async(senderID, receiverID) => {
 }
 
 export const supaInsertNewMessage = async(message) => {
-    const { error } = await supabaseAuth
+    const { error:messageError } = await supabaseAuth
         .from('messages')
         .insert({
             id: message.id,
@@ -300,7 +325,20 @@ export const supaInsertNewMessage = async(message) => {
             content: message.content
         })
         .single();
-    if(error) return {success: false, error: error.message}
+    if(messageError) return {success: false, error: messageError.message}
+
+    const { error:conversationError } = await supabaseAuth
+        .from('conversations')
+        .update({
+            'last_message': message.content,
+            'last_message_at': message.timestamp
+        })
+        .eq('id', message.conversationID)
+        .single();
+    if(conversationError) {
+        console.log('Conversation Error: ', conversationError);
+        return {success: false, error: conversationError.message};
+    }
 
     return {success: true};
 }
@@ -313,4 +351,37 @@ export const fetchMessages = async(conversationID) => {
     if(error) return {success: false, error: error.message};
 
     return {success: true, data};
+}
+
+export const fetchAccountData = async(userID) => {
+    const { data, error } =  await supabaseAuth
+        .from('users')
+        .select('email, username, first_name, last_name')
+        .eq('id', userID)
+        .single();
+    if(error) return {success: false, error: error.message};
+
+    return {success: true, data};
+}
+
+const validateUsername = async(username) => {
+    const { data, error } = await supabaseAuth
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .single();
+    if(!error) return {success: false, error: 'Username already in use!'}
+
+    return {success: true};
+}
+
+export const supaUpdateAccountInfo = async(userID, newAccountInfo) => {
+    const { error } = await supabaseAuth
+        .from('users')
+        .update(newAccountInfo)
+        .eq('id', userID)
+        .single();
+    if(error) return {success: false, error: error.message};
+
+    return {success: true};
 }

@@ -82,10 +82,20 @@
 .message {
     margin-bottom: 1rem;
     font-size: 1.2rem;
+    max-width: 20rem;
+    text-align: center;
 }
 
 .message.error {
     color: red;
+}
+
+.message.success {
+    color: green;
+}
+
+.message.loading {
+    color: black !important;
 }
 
 

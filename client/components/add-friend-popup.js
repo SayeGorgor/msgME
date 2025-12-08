@@ -9,7 +9,7 @@ import { setShowAddContactWindow } from '@/lib/redux/slices/headerSlice';
 
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
-import { setHomeMessage, setHasHomeError, sendRequest } from '@/lib/redux/slices/homeSlice';
+import { setHomeMessage, setHasHomeError, sendRequest, setIsHomeLoading } from '@/lib/redux/slices/homeSlice';
 
 export default function AddFriendPopup() {
     //Use States
@@ -22,6 +22,7 @@ export default function AddFriendPopup() {
     const dispatch = useDispatch();
     const showAddContactWindow = useSelector(state => state.header.showAddContactWindow);
     const session = useSelector(state => state.auth.session);
+    const isLoading = useSelector(state => state.home.isLoading);
     const hasError = useSelector(state => state.home.hasError);
     const homeMessage = useSelector(state => state.home.message);
 
@@ -37,9 +38,11 @@ export default function AddFriendPopup() {
     const lookupUser = async(e) => {
         e.preventDefault();
         setUserFound(false);
+        dispatch(setIsHomeLoading(true));
         dispatch(setHasHomeError(false));
         dispatch(setHomeMessage('Searching...'));
         const res = await searchByUsername(username);
+        dispatch(setIsHomeLoading(false));
         console.log('New Res: ', res);
         if(!res.success) {
             dispatch(setHomeMessage(res.message));
@@ -68,7 +71,11 @@ export default function AddFriendPopup() {
                 />
                 <h2>Add Friend</h2>
                 {homeMessage && 
-                    <p className={`${styles.message} ${hasError ? styles.error : ''}`}>
+                    <p className={`
+                        ${styles.message} 
+                        ${hasError ? styles.error : styles.success}
+                        ${isLoading ? styles.loading : ''}
+                    `}>
                         {homeMessage}
                     </p>
                 }

@@ -9,7 +9,7 @@ import { loadMessages, setChattingWith, setCurrentConversationID, clearMessageLo
 import styles from './contact-card.module.css';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
 
-export default function ContactCard({ username, latestMessage, conversationID }) {
+export default function ContactCard({ username, lastMessage, conversationID }) {
     const socket = useContext(SocketContext);
 
     //Redux
@@ -44,7 +44,7 @@ export default function ContactCard({ username, latestMessage, conversationID })
             </div>
             <div className={styles['contact-info']}>
                 <h3>{username}</h3>
-                <p>{latestMessage}</p>
+                <p>{lastMessage}</p>
             </div>
         </div>
     );

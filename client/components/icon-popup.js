@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setShowAccountOptionsWindow } from '@/lib/redux/slices/headerSlice';
 import styles from './icon-popup.module.css';
 import { logout, setIsAuthorized } from '@/lib/redux/slices/authSlice';
+import { setShowAccountWindow } from '@/lib/redux/slices/accountSlice';
 
 export default function IconPopup() {
     const popupRef = useRef(null);
@@ -16,6 +17,11 @@ export default function IconPopup() {
     //Functions
     const handleLogout = () => {
         dispatch(logout());
+        dispatch(setShowAccountOptionsWindow(false));
+    }
+
+    const openManageAccountWindow = () => {
+        dispatch(setShowAccountWindow(true));
         dispatch(setShowAccountOptionsWindow(false));
     }
 
@@ -50,7 +56,10 @@ export default function IconPopup() {
             ref={popupRef}
         >
             <ul className={styles['options-list']}>
-                <li className={styles['top-option']}>
+                <li 
+                    className={styles['top-option']} 
+                    onClick={openManageAccountWindow}
+                >
                     Manage Account
                 </li>
                 <li className={styles['bottom-option']} onClick={handleLogout}>

@@ -5,9 +5,9 @@ import {
     fetchUsernameByID, 
     supaDecideOnRequest,
     supaInsertNewMessage, 
-    fetchMessages
+    fetchMessages,
+    fetchContacts
 } from '@/lib/client-actions';
-import { setHasError, setMessage } from './authSlice';
 
 export const sendRequest = createAsyncThunk(
     'home/sendRequest',
@@ -17,6 +17,20 @@ export const sendRequest = createAsyncThunk(
             if(error) return thunkAPI.rejectWithValue(error);
         } catch(err) {
             return thunkAPI.rejectWithValue('Error Sending Request');
+        }
+    }
+);
+
+export const loadContacts = createAsyncThunk(
+    'home/loadContacts',
+    async(userID, thunkAPI) => {
+        try {
+            const { data, error } = await fetchContacts(userID);
+            if(error) return thunkAPI.rejectWithValue(error);
+
+            return data;
+        } catch(error) {
+            return thunkAPI.rejectWithValue(error);
         }
     }
 );
@@ -74,13 +88,13 @@ export const decideOnRequest = createAsyncThunk(
 export const insertNewMessage = createAsyncThunk(
     'home/insertNewMessage',
     async(message, thunkAPI) => {
-        const { content, senderID, id } = message;
+        const { content, senderID, id, timestamp, conversationID } = message;
         try {
             const { success, error } = await supaInsertNewMessage(message);
             if(!success) return thunkAPI.rejectWithValue(error);
 
             console.log('Returned Shit: ', content, senderID, id);
-            return { content, id, 'sender_id': senderID };
+            return { content, id, conversationID, timestamp, 'sender_id': senderID };
         } catch(error) {
             return thunkAPI.rejectWithValue(error);
         }
@@ -104,6 +118,7 @@ export const loadMessages = createAsyncThunk(
 const homeSlice = createSlice({
     name: 'home',
     initialState: {
+        contacts: [],
         chattingWith: '',
         incomingFriendRequests: [],
         outgoingFriendRequests: [],
@@ -131,6 +146,9 @@ const homeSlice = createSlice({
         },
         addMessage: (state, action) => {
             state.messageLog = [...state.messageLog, action.payload];
+        },
+        setIsHomeLoading: (state, action) => {
+            state.isLoading = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -146,6 +164,22 @@ const homeSlice = createSlice({
                 state.message = 'Request Sent!';
             })
             .addCase(sendRequest.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.message = action.payload;
+            })
+            .addCase(loadContacts.pending, state => {
+                state.isLoading = true;
+                state.hasError = false;
+                state.message = 'Loading Contacts...';
+            })
+            .addCase(loadContacts.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.hasError = false;
+                state.message = '';
+                state.contacts = action.payload;
+            })
+            .addCase(loadContacts.rejected, (state, action) => {
                 state.isLoading = false;
                 state.hasError = true;
                 state.message = action.payload;
@@ -194,6 +228,12 @@ const homeSlice = createSlice({
                 state.hasError = false;
                 state.message = '';
                 state.messageLog = [...state.messageLog, action.payload];
+                for(let contact of state.contacts) {
+                    if(contact.conversationID === action.payload.conversationID) {
+                        contact['last_message'] = action.payload.content;
+                        contact['last_message_at'] = action.payload.timestamp;
+                    }
+                }
             })
             .addCase(insertNewMessage.rejected, (state, action) => {
                 state.isLoading = false;
@@ -225,7 +265,8 @@ export const {
     setHasHomeError,
     setCurrentConversationID,
     clearMessageLog,
-    addMessage
+    addMessage,
+    setIsHomeLoading
 } = homeSlice.actions;
 
 export default homeSlice.reducer;

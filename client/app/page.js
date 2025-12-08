@@ -12,8 +12,9 @@ import { setIsAuthorized, setMessage, setSession, setUser } from "@/lib/redux/sl
 
 import MessageCard from '../components/message-card';
 import ContactCard from '../components/contact-card';
-import { addMessage, clearMessageLog, insertNewMessage, loadFriendRequests, setChattingWith, setMessageLog } from '@/lib/redux/slices/homeSlice';
+import { addMessage, clearMessageLog, insertNewMessage, loadContacts, loadFriendRequests, setChattingWith, setMessageLog } from '@/lib/redux/slices/homeSlice';
 import { SocketContext } from '@/lib/socket/socket';
+import { loadAccountData } from '@/lib/redux/slices/accountSlice';
 
 export default function Home() {
   const socket = useContext(SocketContext);
@@ -26,13 +27,13 @@ export default function Home() {
   const session = useSelector(state => state.auth.session);
 
   const chattingWith = useSelector(state => state.home.chattingWith);
+  const contacts = useSelector(state => state.home.contacts);
   const currentConversationID = useSelector(state => state.home.currentConversationID);
   const messageLog = useSelector(state => state.home.messageLog);
 
   //States
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [userContacts, setUserContacts] = useState([]);
 
   //Functions
   const sendMessage = (e) => {
@@ -42,7 +43,8 @@ export default function Home() {
       id,
       conversationID: currentConversationID,
       senderID: session?.user?.id,
-      content: newMessage
+      content: newMessage,
+      timestamp: new Date().toISOString()
     }
     dispatch(insertNewMessage(message));
     socket.emit('send_message', message);
@@ -65,16 +67,13 @@ export default function Home() {
           .then(res => {
             if(res.success) dispatch(setUser(res.username));
           });
-          //Fetch contacts
-          fetchContacts(session.user.id)
-          .then((res) => {
-            if(res.success) {
-              setUserContacts(res.contacts);
-            }
-            dispatch(setIsAuthorized(true));
-          });
+          //Fetch Contacts
+          dispatch(loadContacts(session.user.id));
           //Fetch friend requests
           dispatch(loadFriendRequests(session.user.id));
+          //Fetch account data
+          dispatch(loadAccountData(session.user.id));
+          dispatch(setIsAuthorized(true));
         } else {
           dispatch(setIsAuthorized(false));
         }
@@ -123,11 +122,11 @@ export default function Home() {
           <div className={styles['contacts-section']}>
             <h2>Contacts</h2>
             <ul className={styles['contact-list']}>
-              {userContacts.map(contact => (
+              {contacts.map(contact => (
                 <li key={contact.id}>
                   <ContactCard 
                     username={contact.username} 
-                    latestMessage={'This is our lastest message'}
+                    lastMessage={contact['last_message'] || 'Send them a message!'}
                     conversationID={contact.conversationID} 
                   />
                 </li>
@@ -135,32 +134,42 @@ export default function Home() {
             </ul>
           </div>
           <div className={styles['messaging-section']}>
-            <div className={styles['messaging-section-contact-banner']}>
-              <h2>{chattingWith}</h2>
+            {chattingWith ? (
+              <>
+                <div className={styles['messaging-section-contact-banner']}>
+                  <h2>{chattingWith}</h2>
+                </div>
+                <div className={styles['messaging-section-texts-section']}>
+                  <ul className={styles['message-thread']}>
+                    {messageLog.map(message =>(
+                      <li key={message.id}>
+                        <MessageCard 
+                          senderID={message['sender_id']} 
+                          content={message.content} 
+                          id={message.id} 
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <form className={styles['messaging-section-text-bar']} onSubmit={sendMessage}>
+                  <input
+                    type="text"
+                    name="pending-message"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type Message..."
+                  />
+                  <button type="submit">Send</button>
+                </form>
+              </>
+            )
+            :
+            <div className={styles['welcome-text']}>
+              <h2>Welcome to msgME!</h2>
+              <p>Add friends or click on a friend to start messaging!</p>
             </div>
-            <div className={styles['messaging-section-texts-section']}>
-              <ul className={styles['message-thread']}>
-                {messageLog.map(message =>(
-                  <li key={message.id}>
-                    <MessageCard 
-                      senderID={message['sender_id']} 
-                      content={message.content} 
-                      id={message.id} 
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <form className={styles['messaging-section-text-bar']} onSubmit={sendMessage}>
-              <input
-                type="text"
-                name="pending-message"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type Message..."
-              />
-              <button type="submit">Send</button>
-            </form>
+          }
           </div>
         </main>
         :

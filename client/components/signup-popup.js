@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styles from './signup-popup.module.css';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import { setShowSignupWindow } from '@/lib/redux/slices/headerSlice';
-import { setMessage, signup } from '@/lib/redux/slices/authSlice';
+import { setIsLoading, setMessage, signup } from '@/lib/redux/slices/authSlice';
 import { setHasError } from '../lib/redux/slices/authSlice';
 
 export default function SignupPopup() {
@@ -21,6 +21,7 @@ export default function SignupPopup() {
     const dispatch = useDispatch();
     const showSignupWindow = useSelector(state => state.header.showSignupWindow);
     const hasError = useSelector(state => state.auth.hasError);
+    const isLoading = useSelector(state => state.auth.isLoading);
     const message = useSelector(state => state.auth.message);
 
     //Functions
@@ -40,16 +41,11 @@ export default function SignupPopup() {
         e.preventDefault();
         console.log('Attempting Sign Up');
         if(password !== passwordConfirm) {
+            dispatch(setHasError(true));
             dispatch(setMessage('Passwords must match!'));
         } else {
             const userInfo = {email, username, firstName, lastName, password}
-            dispatch(signup(userInfo))
-            .then(res => {
-                console.log('Status: ', res.meta.requestStatus);
-                if(res.meta.requestStatus === 'fulfilled') {
-                    closeWindow();
-                }
-            });
+            dispatch(signup(userInfo));
         }
     }
 
@@ -62,7 +58,11 @@ export default function SignupPopup() {
                 />
                 <h2>Sign Up</h2>
                 {message && 
-                    <p className={`${styles.message} ${hasError ? styles.error : ''}`}>
+                    <p className={`
+                        ${styles.message} 
+                        ${hasError ? styles.error : styles.success}
+                        ${isLoading ? styles.loading : ''}
+                    `}>
                         {message}
                     </p>
                 }

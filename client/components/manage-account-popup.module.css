@@ -5,7 +5,7 @@
     position: fixed;
     top: 50%;
     left: 50%;
-    width: 30rem;
+    width: 60vw;
     background-color: white;
     border-radius: 1rem;
     transform: translate(-50%, -50%);
@@ -16,81 +16,61 @@
     display: flex;
 }
 
-.add-contact-form {
+.body h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.account-form {
     display: flex;
     flex-direction: column;
     margin: 1rem 0;
 }
 
-.add-contact-form input {
-    height: 1.8rem;
-    width: 15rem;
-    padding-left: .5rem;
-    border: 1px solid gray;
-    border-radius: .5rem;
-}
-
-.add-contact-form button {
-    height: 1.8rem;
-    width: 15rem;
-    border: none;
-    border-radius: .5rem;
-    background-color: rgb(0, 183, 255);
-}
-
-.add-contact-form button:hover,
-.add-user-btn:hover {
-    cursor: pointer;
-    background-color: rgb(0, 146, 204);
-}
-
-.add-contact-form button:active,
-.add-user-btn:active {
-    background-color: rgb(0, 111, 155);
-}
-
-/* User Check Section */
-.user-check-section {
+.account-form label {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-top: 1rem
-}
-
-.user-check-section button {
-    height: 1.8rem;
-    width: 10rem;
-    border: none;
-    border-radius: .5rem;
-    background-color: rgb(0, 183, 255);
     margin-bottom: 1rem;
 }
 
-.user-card {
-  display: flex;
-  align-items: center;
-  margin: 1rem 0;
-  height: 4rem;
-  padding: 0 .5rem;
-  background-color: lightgray;
+.account-form input {
+    height: 1.8rem;
+    margin-top: .2rem;
+    padding-left: .5rem;
+    border: 1px rgb(110, 110, 110) solid;
+    border-radius: .5rem;
 }
 
-.username {
-  margin-left: 1rem;
+.account-form button {
+    height: 2.5rem;
+    background-color: rgb(0, 183, 255);
+    border: 2px solid rgb(0, 183, 255);
+    border-radius: .5rem;
 }
 
-.pfp-container {
-  height: 3rem;
-  width: 3rem;
-  background-color: gray;
+.account-form button:hover {
+  cursor: pointer;
+  background-color: rgb(0, 146, 204);
+  border: 2px solid rgb(0, 146, 204);
 }
 
-.pfp {
-  height: 100%;
-  width: 100%;
+.account-form button:active {
+  background-color: rgb(0, 111, 155);
+  border: 2px solid rgb(0, 111, 155);
 }
 
-/* MAIN MISC */
+.account-form button:disabled {
+    cursor: auto;
+    pointer-events: none;
+    background-color: gray;
+    border: 2px solid gray;
+}
+
+.name-section {
+    display: flex;
+    gap: 1rem;
+}
+
 .close-window-icon {
     height: 2rem;
     width: auto;
@@ -105,9 +85,22 @@
     background-color: red;
 }
 
+.pfp-container {
+  height: 7rem;
+  width: 7rem;
+  background-color: gray;
+}
+
+.pfp {
+  height: 100%;
+  width: 100%;
+}
+
 .message {
-    margin-top: .5rem;
+    margin-top: 1rem;
     font-size: 1.2rem;
+    max-width: 20rem;
+    text-align: center;
 }
 
 .message.error {
@@ -121,8 +114,6 @@
 .message.loading {
     color: black !important;
 }
-
-/* OVERLAY */
 
 .overlay {
     position: fixed;

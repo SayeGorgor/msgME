@@ -81,10 +81,10 @@ export const authSlice = createSlice({
             .addCase(signup.fulfilled, state => {
                 state.isLoading = false;
                 state.hasError = false;
-                state.message = '';
+                state.message = 'Sign Up Successful, Please Check Email for Confirmation';
             })
             .addCase(signup.rejected, (state, action) => {
-                state.isLoading = true;
+                state.isLoading = false;
                 state.hasError = true;
                 state.message = action.payload;
             })
@@ -100,7 +100,7 @@ export const authSlice = createSlice({
                 state.isAuthorized = true;
             })
             .addCase(login.rejected, (state, action) => {
-                state.isLoading = true;
+                state.isLoading = false;
                 state.hasError = true;
                 state.message = action.payload;
             })
@@ -118,7 +118,7 @@ export const authSlice = createSlice({
                 state.session = {};
             })
             .addCase(logout.rejected, (state, action) => {
-                state.isLoading = true;
+                state.isLoading = false;
                 state.hasError = true;
                 state.message = action.payload;
             })
