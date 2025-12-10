@@ -6,6 +6,7 @@
     background-color: white;
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 4;
 }
 
 .body.visible {

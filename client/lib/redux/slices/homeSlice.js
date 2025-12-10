@@ -90,11 +90,18 @@ export const insertNewMessage = createAsyncThunk(
     async(message, thunkAPI) => {
         const { content, senderID, id, timestamp, conversationID } = message;
         try {
-            const { success, error } = await supaInsertNewMessage(message);
+            const { success, data, error } = await supaInsertNewMessage(message);
             if(!success) return thunkAPI.rejectWithValue(error);
 
             console.log('Returned Shit: ', content, senderID, id);
-            return { content, id, conversationID, timestamp, 'sender_id': senderID };
+            return { 
+                content, 
+                id, 
+                conversationID, 
+                'created_at': timestamp, 
+                'sender_id': senderID,
+                ...(data && {'media_path': data})
+             };
         } catch(error) {
             return thunkAPI.rejectWithValue(error);
         }
@@ -110,7 +117,7 @@ export const loadMessages = createAsyncThunk(
 
             return data;
         } catch(error) {
-            thunkAPI.rejectWithValue(error);
+            return thunkAPI.rejectWithValue(error);
         }
     }
 );

@@ -14,6 +14,13 @@
   margin-left: 1rem;
 }
 
+.contact-info p {
+  max-width: 25rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .pfp-container {
   height: 3rem;
   width: 3rem;

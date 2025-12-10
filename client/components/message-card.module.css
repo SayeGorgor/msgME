@@ -28,7 +28,7 @@
 .message-body {
   display: flex;
   align-items: center;
-  height: 3rem;
+  min-height: 3rem;
   padding: 0 .5rem;
   z-index: 2;
 }
@@ -41,11 +41,30 @@
   margin-left: auto;
 }
 
+.message-content-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.message-content-wrapper.user {
+  align-items: end;
+}
+
+.message-content-wrapper.contact {
+  align-items: start;
+}
+
 .message {
   display: flex;
   align-items: center;
   padding: .5rem 1rem;
   border-radius: 1rem;
+  word-wrap: break-word;
+}
+
+.message p{
+  max-width: 15rem;
+  word-wrap: break-word;
 }
 
 .message.user-message {
@@ -55,6 +74,21 @@
 
 .message.contact-message {
   background-color: rgb(179, 179, 179);
+}
+
+.media {
+  height: 10rem;
+  width: 10rem;
+  border-radius: 1rem;
+  margin-bottom: .1rem;
+  margin-top: .5rem;
+}
+
+.media img {
+  height: 100%;
+  width: 100%;
+  border-radius: 1rem;
+  object-fit: cover;
 }
 
 .timestamp {

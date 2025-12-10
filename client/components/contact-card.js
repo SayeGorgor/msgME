@@ -9,7 +9,7 @@ import { loadMessages, setChattingWith, setCurrentConversationID, clearMessageLo
 import styles from './contact-card.module.css';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
 
-export default function ContactCard({ username, lastMessage, conversationID }) {
+export default function ContactCard({ username, lastMessage, conversationID, scrollMessageThreadToBottom }) {
     const socket = useContext(SocketContext);
 
     //Redux
@@ -19,10 +19,10 @@ export default function ContactCard({ username, lastMessage, conversationID }) {
     const messageLog = useSelector(state => state.home.messageLog);
     
     //Load Conversation
-    const loadConvo = () => {
+    const loadConvo = async() => {
         //Clear old message log and load in new log
         dispatch(clearMessageLog());
-        dispatch(loadMessages(conversationID));
+        await dispatch(loadMessages(conversationID));
         console.log('Message Log: ', messageLog);
         console.log('User ID: ', session.user.id);
 
@@ -35,6 +35,7 @@ export default function ContactCard({ username, lastMessage, conversationID }) {
         dispatch(setChattingWith(username));
         dispatch(setCurrentConversationID(conversationID));
         console.log('Conversation ID: ', conversationID);
+        scrollMessageThreadToBottom();
     }
 
     return(

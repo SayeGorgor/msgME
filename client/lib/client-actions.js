@@ -316,16 +316,54 @@ const createConversation = async(senderID, receiverID) => {
 }
 
 export const supaInsertNewMessage = async(message) => {
+    let fileName = '';
+    let newMediaPath = '';
+    const { id, mediaPath, conversationID, senderID, content } = message;
+    if(mediaPath) {
+        const ext = mediaPath.name.split('.').pop();
+        fileName = `${conversationID}.${crypto.randomUUID()}.${ext}`;
+
+        console.log("Uploading with metadata:", {
+            'conversation_id': conversationID,
+            'sender_id': senderID
+        });
+
+        const { error:storageError } = await supabaseAuth.storage
+            .from('message_media')
+            .upload(fileName, mediaPath, {
+                metadata: {
+                    'conversation_id':conversationID,
+                    'sender_id': senderID
+                }    
+            });
+        if(storageError) {
+            console.log('Store Error: ', storageError);
+            return {success: false, error: storageError.message};
+        }
+
+        const { data:mediaPathData, error:mediaPathError } = await supabaseAuth.storage
+            .from('message_media')
+            .createSignedUrl(fileName, 120);
+
+        newMediaPath = mediaPathData.signedUrl;
+    }
+
+    const payload = {
+        id: id,
+        'conversation_id': conversationID,
+        'sender_id': senderID,
+        content: content,
+        ...(fileName && {'media_path': fileName})
+    }
+
     const { error:messageError } = await supabaseAuth
         .from('messages')
-        .insert({
-            id: message.id,
-            'conversation_id': message.conversationID,
-            'sender_id': message.senderID,
-            content: message.content
-        })
+        .insert(payload)
         .single();
-    if(messageError) return {success: false, error: messageError.message}
+    if(messageError) {
+        console.log('Message Error: ', messageError);
+        return {success: false, error: messageError.message}
+    }
 
     const { error:conversationError } = await supabaseAuth
         .from('conversations')
@@ -340,15 +378,44 @@ export const supaInsertNewMessage = async(message) => {
         return {success: false, error: conversationError.message};
     }
 
-    return {success: true};
+    return {success: true, data: newMediaPath};
 }
 
 export const fetchMessages = async(conversationID) => {
     const { data, error } = await supabaseAuth
         .from('messages')
-        .select('id, sender_id, content, created_at')
+        .select('*')
         .eq('conversation_id', conversationID);
     if(error) return {success: false, error: error.message};
+
+    for(let message of data) {
+        console.log('Message: ', message);
+         if(message['media_path']) {
+            console.log('Image found')
+            const { data:mediaPathData, error:mediaPathError } = await supabaseAuth.storage
+                .from('message_media')
+                .createSignedUrl(message['media_path'], 120);
+            
+            if(error) console.log('Media Path Error: ', mediaPathError);
+            console.log('Signed Url: ', mediaPathData.signedUrl);
+            message['media_path'] = mediaPathData.signedUrl;
+        } else {
+            console.log('No image')
+        }
+    }
+
+    if(data['media_path']) {
+        console.log('Path found')
+        const { data:mediaPathData, error:mediaPathError } = await supabaseAuth.storage
+            .from('message_media')
+            .createSignedUrl(data['media_path'], 120);
+        
+        if(error) console.log('Media Path Error: ', mediaPathError);
+        console.log('Signed Url: ', mediaPathData.signedUrl);
+        data['media_path'] = mediaPathData.signedUrl;
+    } else {
+        console.log('Yo shit gone')
+    }
 
     return {success: true, data};
 }
