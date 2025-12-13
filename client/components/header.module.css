@@ -80,7 +80,7 @@
     color: gray;
 }
 
-.user-pfp {
+.pfp-container {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -93,8 +93,15 @@
     transition: background-color .3s ease;
 }
 
-.user-pfp:hover {
+.pfp-container:hover {
     cursor: pointer;
     background-color: rgb(82, 82, 82);
+}
+
+.pfp {
+    height: 100%;
+    width: 100%;
+    border-radius: 2rem;
+    object-fit: cover;
 }
 

@@ -85,12 +85,12 @@ export const fetchContacts = async(userID) => {
     if(error) return { success: false, message: error.message };
 
     for(let row of data) {
-        const { data:usernameData, error:usernameError } = await supabaseAuth
+        const { data:contactData, error:contactError } = await supabaseAuth
             .from('users')
-            .select('username')
+            .select('username, pfp_path')
             .eq('id', row['contact_id'])
             .single();
-        if(usernameError) return({success: false, message: error.message});
+        if(contactError) return({success: false, message: error.message});
 
         //Fetch conversation id
         const { data:conversationID, error:rpcError } = await supabaseAuth.rpc('fetch_conversation_id',
@@ -105,10 +105,21 @@ export const fetchContacts = async(userID) => {
         }
         const { data: conversationData, error } = await fetchConversationInfo(conversationID);
         if(error) return {success:false, error}
+
+        //Get signed pfp url if contact has one
+        if(contactData['pfp_path']) {
+            console.log('Contact PFP Path: ', contactData['pfp_path']);
+            const { data:pfpData, error:pfpError } = await supabaseAuth.storage
+                .from('user_pfps')
+                .createSignedUrl(contactData['pfp_path'], 120);
+            if(pfpError) return {success: false, error: pfpError.message};
+
+            contactData['pfp_path'] = pfpData.signedUrl;
+        }
         
         contacts.push({
             ...conversationData,
-            username: usernameData.username, 
+            ...contactData,
             id: row['contact_id'],
             conversationID
         });
@@ -453,12 +464,22 @@ export const fetchOlderMessages = async(conversationID, oldestMessageDate) => {
 }
 
 export const fetchAccountData = async(userID) => {
-    const { data, error } =  await supabaseAuth
+    const { data, error } = await supabaseAuth
         .from('users')
-        .select('email, username, first_name, last_name')
+        .select('email, username, first_name, last_name, pfp_path')
         .eq('id', userID)
         .single();
     if(error) return {success: false, error: error.message};
+
+    if(data['pfp_path']) {
+        console.log('Path: ', data['pfp_path']);
+        const { data:pfpPathData, error:pfpPathError } = await supabaseAuth.storage
+            .from('user_pfps')
+            .createSignedUrl(data['pfp_path'], 120);
+        if(pfpPathError) return {success: false, error: pfpPathError.message}
+
+        data['pfp_path'] = pfpPathData.signedUrl;
+    }
 
     return {success: true, data};
 }
@@ -475,14 +496,41 @@ const validateUsername = async(username) => {
 }
 
 export const supaUpdateAccountInfo = async(userID, newAccountInfo) => {
-    const { error } = await supabaseAuth
+    let signedPFP = '';
+    console.log('New Account Info: ', newAccountInfo);
+    const pfpPath = newAccountInfo['pfp_path'];
+    
+    if(pfpPath) {
+        const ext = pfpPath.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${ext}`;
+
+        const { error:storageError } = await supabaseAuth.storage
+            .from('user_pfps')
+            .upload(fileName, pfpPath);
+        if(storageError) {
+            console.log('Store Error: ', storageError);
+            return {success: false, error: storageError.message};
+        }
+
+        const { data:pfpPathData, error:pfpPathError } = await supabaseAuth.storage
+            .from('user_pfps')
+            .createSignedUrl(fileName, 120);
+
+        signedPFP = pfpPathData.signedUrl;
+        newAccountInfo['pfp_path'] = fileName;
+    }
+
+    const { error:updateError } = await supabaseAuth
         .from('users')
         .update(newAccountInfo)
         .eq('id', userID)
         .single();
-    if(error) return {success: false, error: error.message};
+    if(updateError) return {success: false, error: updateError.message};
 
-    return {success: true};
+    return {
+        success: true,
+        ...(signedPFP && {data: {signedPFP}})
+    };
 }
 
 export const supaVerifyNewUser = (userInfo) => {

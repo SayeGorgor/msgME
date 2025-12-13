@@ -283,7 +283,6 @@ const homeSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = false;
                 state.message = '';
-                state.currentConversationID = action.payload.conversationID;
                 state.messageLog = [...state.messageLog, ...action.payload.log];
                 state.oldestLoadedMessageDate = action.payload.oldestDate;
                 state.hasMoreMessages = action.payload.hasMore;

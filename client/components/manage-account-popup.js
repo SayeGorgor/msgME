@@ -17,6 +17,7 @@ export default function ManageAccountPopup() {
     const dispatch = useDispatch();
     const session = useSelector(state => state.auth.session);
     const accountData = useSelector(state => state.account.accountData);
+    const pfpPath = accountData['pfp_path'];
     const showAccountWindow = useSelector(state => state.account.showWindow);
     const hasAccountError = useSelector(state => state.account.hasError);
     const accountMessage = useSelector(state => state.account.message);
@@ -44,9 +45,10 @@ export default function ManageAccountPopup() {
         e.preventDefault();
         const userID = session?.user?.id;
         const info = {
+            username,
             'first_name': firstName,
             'last_name': lastName,
-            username
+            ...(mediaPath && {'pfp_path': mediaPath})
         }
         const requestData = {userID, info}
         dispatch(updateAccountInfo(requestData));
@@ -61,6 +63,11 @@ export default function ManageAccountPopup() {
             setMediaPath(file);
             setPreview(URL.createObjectURL(file));
         }
+    }
+
+    const clearPfpSelection = () => {
+        setMediaPath('');
+        setPreview('');
     }
 
     //Use Effects
@@ -78,13 +85,14 @@ export default function ManageAccountPopup() {
     useEffect(() => {
         if(username === accountData.username &&
            firstName === accountData['first_name'] &&
-           lastName === accountData['last_name']
+           lastName === accountData['last_name'] &&
+           !mediaPath
         ) {
             setIsEditing(false);
         } else {
             setIsEditing(true);
         }
-    }, [username, firstName, lastName, accountData]);
+    }, [username, firstName, lastName, accountData, mediaPath]);
 
     return(
         <>
@@ -99,17 +107,28 @@ export default function ManageAccountPopup() {
                         className={styles['add-pfp-btn']}
                         onClick={() => fileInputRef.current.click()}
                     >
-                        +
+                        <CloseWindowIcon className={styles['add-pfp-btn-icon']} />
                         <input 
                             type='file' 
                             onChange={(e) => uploadImage(e)}
                             ref={fileInputRef}
                         />
                     </button>
+                    {preview && (
+                        <button 
+                            className={styles['remove-pfp-btn']} 
+                            onClick={clearPfpSelection}
+                        >
+                            <CloseWindowIcon className={styles['remove-pfp-btn-icon']} />
+                        </button>
+                    )}
                     {preview ? 
-                        <img src={preview} className={styles.pfp} />
+                        <img src={preview} className={styles.pfp} alt='img 1'/>
                         :
-                        <DefaultPFP className={styles.pfp} />
+                        pfpPath ? 
+                            <img src={pfpPath} className={styles.pfp} alt='img 2'/>
+                        :
+                            <DefaultPFP className={styles.pfp} />
                     }
                 </div>
                 {accountMessage && 

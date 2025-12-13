@@ -19,6 +19,7 @@ export const updateAccountInfo = createAsyncThunk(
     'account/updateAccountInfo',
     async(requestData, thunkAPI) => {
         console.log('Starting thunk');
+        console.log('Account Request Data: ', requestData);
         const state = thunkAPI.getState();
         const { userID, info } = requestData;
         let newAccountInfo = {};
@@ -38,8 +39,9 @@ export const updateAccountInfo = createAsyncThunk(
         }
         console.log('Said array', newAccountInfo);
         try {
-            const { success, error } = await supaUpdateAccountInfo(userID, newAccountInfo);
+            const { success, error, data } = await supaUpdateAccountInfo(userID, newAccountInfo);
             if(!success) return thunkAPI.rejectWithValue(error);
+            if(data) newAccountInfo['pfp_path'] = data?.signedPFP;
 
             return newAccountInfo;
         } catch(error) {

@@ -9,7 +9,14 @@ import { loadMessages, setChattingWith, setCurrentConversationID, clearMessageLo
 import styles from './contact-card.module.css';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
 
-export default function ContactCard({ username, lastMessage, conversationID, scrollMessageThreadToBottom }) {
+export default function ContactCard(props) {
+    const { 
+        username, 
+        lastMessage, 
+        conversationID, 
+        scrollMessageThreadToBottom,
+        pfpPath
+    } = props
     const socket = useContext(SocketContext);
 
     //Redux
@@ -33,7 +40,7 @@ export default function ContactCard({ username, lastMessage, conversationID, scr
 
         //Update the current conversation information
         dispatch(setChattingWith(username));
-        await dispatch(setCurrentConversationID(conversationID));
+        dispatch(setCurrentConversationID(conversationID));
         console.log('Conversation ID: ', conversationID);
         console.log('Current Conversation ID: ', currentConversationID);
         scrollMessageThreadToBottom();
@@ -42,7 +49,15 @@ export default function ContactCard({ username, lastMessage, conversationID, scr
     return(
         <div className={styles['contact-card']} onClick={loadConvo}>
             <div className={styles['pfp-container']}>
-                <DefaultPFP className={styles.pfp} />
+                {pfpPath ? 
+                    <img 
+                        src={pfpPath} 
+                        className={styles.pfp}
+                        alt={`${username}'s Profile Picture`} 
+                    />
+                    :
+                    <DefaultPFP className={styles.pfp} />
+                }
             </div>
             <div className={styles['contact-info']}>
                 <h3>{username}</h3>

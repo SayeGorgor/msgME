@@ -217,7 +217,7 @@ export default function Home() {
     }
 
     return () => observer.disconnect();
-  }, [hasMoreMessages, isLoading]);
+  }, [hasMoreMessages, isLoading, currentConversationID]);
 
   return (
     <div className={styles.page}>
@@ -230,6 +230,7 @@ export default function Home() {
                 <li key={contact.id}>
                   <ContactCard 
                     username={contact.username} 
+                    pfpPath={contact['pfp_path']}
                     lastMessage={contact['last_message'] || 'Send them a message!'}
                     conversationID={contact.conversationID} 
                     scrollMessageThreadToBottom={scrollMessageThreadToBottom}

@@ -113,12 +113,14 @@
     width: 1.5rem;
 }
 
-.add-pfp-btn:hover {
+.add-pfp-btn:hover,
+.remove-pfp-btn:hover {
     cursor: pointer;
     background-color: lightgray;
 }
 
-.add-pfp-btn:active {
+.add-pfp-btn:active,
+.remove-pfp-btn:active {
     background-color: gray;
 }
 
@@ -126,6 +128,27 @@
     position: absolute;
     opacity: 0;
     pointer-events: none;
+}
+
+.remove-pfp-btn {
+    position: absolute;
+    top: -7%;
+    left: -7%;
+    border: 1px solid black;
+    border-radius: 1rem;
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.remove-pfp-btn-icon,
+.add-pfp-btn-icon {
+    height: 100%;
+    width: 100%;
+    transform: scale(.9, .9);
+}
+
+.add-pfp-btn-icon {
+    transform: scale(.9, .9) rotate(45deg);
 }
 
 .message {

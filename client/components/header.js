@@ -18,6 +18,8 @@ export default function Header() {
     const dispatch = useDispatch();
     const isAuthorized = useSelector(state => state.auth.isAuthorized);
     const user = useSelector(state => state.auth.user);
+    const accountData = useSelector(state => state.account.accountData);
+    const pfpPath = accountData['pfp_path'];
 
     //Functions
     const openIconPopup = (e) => {
@@ -52,8 +54,16 @@ export default function Header() {
                             </div>
                         </li>
                         <li>
-                            <div className={styles['user-pfp']} onClick={openIconPopup}>
-                                S
+                            <div className={styles['pfp-container']} onClick={openIconPopup}>
+                                {pfpPath ? 
+                                    <img 
+                                        src={pfpPath} 
+                                        className={styles.pfp} 
+                                        alt='User Profile Picture'
+                                    />
+                                    :
+                                    <p>{user.slice(0, 1).toUpperCase()}</p>
+                                }
                             </div>
                         </li>
                     </ul>
