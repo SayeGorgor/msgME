@@ -118,9 +118,19 @@
     margin-left: 1rem;
 }
 
+.external-login-option.apple p {
+    margin-left: .5rem;
+}
+
 .logo {
     height: 2rem;
     width: auto;
+}
+
+.logo.apple {
+    height: 2.5rem;
+    margin-right: 0;
+    margin-bottom: .2rem;
 }
 
 .message {

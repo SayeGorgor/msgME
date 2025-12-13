@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './manage-account-popup.module.css';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,6 +11,8 @@ import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
 
 export default function ManageAccountPopup() {
+    const fileInputRef = useRef(null);
+
     //Redux
     const dispatch = useDispatch();
     const session = useSelector(state => state.auth.session);
@@ -26,12 +28,16 @@ export default function ManageAccountPopup() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [isEditing, setIsEditing] = useState(false);
+    const [mediaPath, setMediaPath] = useState('');
+    const [preview, setPreview] = useState('');
 
     //Functions
     const closeAccountWindow = () => {
         dispatch(setShowAccountWindow(false));
         dispatch(setAccountMessage(''));
         dispatch(setHasAccountError(false));
+        setPreview('');
+        setMediaPath('');
     }
 
     const updateInformation = (e) => {
@@ -44,6 +50,17 @@ export default function ManageAccountPopup() {
         }
         const requestData = {userID, info}
         dispatch(updateAccountInfo(requestData));
+    }
+
+    const uploadImage = (e) => {
+        const file = e.target.files[0];
+        if(file?.type === 'image/jpeg' || 
+           file?.type === 'image/png' ||
+           file?.type === 'image/webp'
+        ) {
+            setMediaPath(file);
+            setPreview(URL.createObjectURL(file));
+        }
     }
 
     //Use Effects
@@ -78,7 +95,22 @@ export default function ManageAccountPopup() {
                 />
                 <h2>Manage Account</h2>
                 <div className={styles['pfp-container']}>
-                    <DefaultPFP className={styles.pfp} />
+                    <button 
+                        className={styles['add-pfp-btn']}
+                        onClick={() => fileInputRef.current.click()}
+                    >
+                        +
+                        <input 
+                            type='file' 
+                            onChange={(e) => uploadImage(e)}
+                            ref={fileInputRef}
+                        />
+                    </button>
+                    {preview ? 
+                        <img src={preview} className={styles.pfp} />
+                        :
+                        <DefaultPFP className={styles.pfp} />
+                    }
                 </div>
                 {accountMessage && 
                     <p className={`

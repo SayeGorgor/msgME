@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { login, setIsAuthorized } from '@/lib/redux/slices/authSlice';
+import { login, setIsAuthorized, signInWithProvider } from '@/lib/redux/slices/authSlice';
 import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
 import styles from './login-popup.module.css';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import GithubLogo from '@/app/(icons)/github_logo.svg';
 import GoogleLogo from '@/app/(icons)/google_logo.svg';
-import InstagramLogo from '@/app/(icons)/ig_logo.svg';
+import AppleLogo from '@/app/(icons)/apple_logo.svg';
 import { setHasError, setMessage } from '../lib/redux/slices/authSlice';
 
 export default function LoginPopup() {
@@ -82,21 +82,37 @@ export default function LoginPopup() {
                 </div>
                 <ul className={styles['external-login-options-list']}>
                     <li>
-                        <div className={styles['external-login-option']}>
+                        <div 
+                            className={`
+                                ${styles['external-login-option']}
+                                ${styles.apple}
+                            `} 
+                        >
+                            <AppleLogo 
+                                className={`
+                                    ${styles.logo}
+                                    ${styles.apple}
+                                `} 
+                             />
+                            <p>Sign in with Apple</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div 
+                            className={styles['external-login-option']}
+                            onClick={() => dispatch(signInWithProvider('github'))}
+                        >
                             <GithubLogo className={styles.logo} />
                             <p>Sign in with Github</p>
                         </div>
                     </li>
                     <li>
-                        <div className={styles['external-login-option']}>
+                        <div 
+                            className={styles['external-login-option']}
+                            onClick={() => dispatch(signInWithProvider('google'))}
+                        >
                             <GoogleLogo className={styles.logo} />
                             <p>Sign in with Google</p>
-                        </div>
-                    </li>
-                    <li>
-                        <div className={styles['external-login-option']}>
-                            <InstagramLogo className={styles.logo} />
-                            <p>Sign in with Instagram</p>
                         </div>
                     </li>
                 </ul>

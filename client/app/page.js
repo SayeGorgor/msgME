@@ -15,6 +15,7 @@ import {
   insertNewMessage, 
   loadContacts, 
   loadFriendRequests, 
+  loadMessages, 
   setChattingWith, 
   setMessageLog 
 } from '@/lib/redux/slices/homeSlice';
@@ -37,6 +38,7 @@ export default function Home() {
   const fileInputRef = useRef(null);
   const pendingMessageRef = useRef(null);
   const threadRef = useRef(null);
+  const threadSentinelRef = useRef(null)
   
   //Redux
   const dispatch = useDispatch();
@@ -49,6 +51,9 @@ export default function Home() {
   const contacts = useSelector(state => state.home.contacts);
   const currentConversationID = useSelector(state => state.home.currentConversationID);
   const messageLog = useSelector(state => state.home.messageLog);
+  const isLoading = useSelector(state => state.home.isLoading);
+  const hasMoreMessages = useSelector(state => state.home.hasMoreMessages);
+  const oldestLoadedMessageDate = useSelector(state => state.home.oldestLoadedMessageDate);
 
   //States
   const [newMessage, setNewMessage] = useState('');
@@ -178,11 +183,41 @@ export default function Home() {
     pendingMessageRef.current.style.height = `${pendingMessageRef.current.scrollHeight}px`;
   }, [newMessage]);
 
+  // useEffect(() => {
+  // if (messageLog.length > 0) {
+  //     scrollMessageThreadToBottom();
+  //   }
+  // }, [messageLog]);
+
+  //Load older messages when near top
   useEffect(() => {
-  if (messageLog.length > 0) {
-      scrollMessageThreadToBottom();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if(entry.isIntersecting) {
+          console.log('Intersection Conditions Status: ', isLoading, hasMoreMessages);
+        }
+        if(entry.isIntersecting && !isLoading && hasMoreMessages) {
+          console.log('Intersection Conditions Found');
+          console.log('Current Conversation ID: ', currentConversationID);
+          dispatch(loadMessages({
+            conversationID: currentConversationID, 
+            oldestMessageDate: oldestLoadedMessageDate
+          }));
+        }
+      },
+      {
+        root: threadRef.current,
+        rootMargin: '50px',
+        threshold: 0
+      }
+    )
+
+    if(threadSentinelRef.current) {
+      observer.observe(threadSentinelRef.current);
     }
-  }, [messageLog]);
+
+    return () => observer.disconnect();
+  }, [hasMoreMessages, isLoading]);
 
   return (
     <div className={styles.page}>
@@ -210,11 +245,12 @@ export default function Home() {
                   <h2>{chattingWith}</h2>
                 </div>
                 <div className={styles['messaging-section-texts-section']} ref={threadRef}>
+                  <div ref={threadSentinelRef}></div>
                   <ul className={`
                     ${styles['message-thread']}
                     ${preview ? styles['image-view'] : ''}
                   `}>
-                    {messageLog.map(message =>(
+                    {messageLog.slice().reverse().map(message =>(
                       <li key={message.id}>
                         <MessageCard 
                           messageObj={message}

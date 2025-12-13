@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { supaSignup, supaLogin, supaLogout } from "@/lib/client-actions";
+import { supaSignup, supaLogin, supaLogout, supabaseAuth } from "@/lib/client-actions";
 
 export const signup = createAsyncThunk(
     'auth/signup',
@@ -29,6 +29,28 @@ export const login = createAsyncThunk(
         }
     }
 );
+
+export const signInWithProvider = createAsyncThunk(
+    'auth/signInWithProvider',
+    async(provider, thunkAPI) => {
+        try {
+            const { error } = await supabaseAuth
+                .auth
+                .signInWithOAuth({
+                    provider,
+                    options: {
+                        redirectTo: `${window.location.origin}/auth/v1/callback`,
+                    }
+                });
+            if(error) {
+                console.log('Thunk Error: ', error);
+                return thunkAPI.rejectWithValue(error);
+            }
+        } catch(error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+)
 
 export const logout = createAsyncThunk(
     'auth/logout',
@@ -84,6 +106,21 @@ export const authSlice = createSlice({
                 state.message = 'Sign Up Successful, Please Check Email for Confirmation';
             })
             .addCase(signup.rejected, (state, action) => {
+                state.isLoading = false;
+                state.hasError = true;
+                state.message = action.payload;
+            })
+            .addCase(signInWithProvider.pending, state => {
+                state.isLoading = true;
+                state.hasError = false;
+                state.message = '';
+            })
+            .addCase(signInWithProvider.fulfilled, state => {
+                state.isLoading = false;
+                state.hasError = false;
+                state.message = '';
+            })
+            .addCase(signInWithProvider.rejected, (state, action) => {
                 state.isLoading = false;
                 state.hasError = true;
                 state.message = action.payload;

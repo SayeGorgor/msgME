@@ -6,7 +6,8 @@ import {
     supaDecideOnRequest,
     supaInsertNewMessage, 
     fetchMessages,
-    fetchContacts
+    fetchContacts,
+    fetchOlderMessages
 } from '@/lib/client-actions';
 
 export const sendRequest = createAsyncThunk(
@@ -110,17 +111,37 @@ export const insertNewMessage = createAsyncThunk(
 
 export const loadMessages = createAsyncThunk(
     'home/loadMessages',
-    async(conversationID, thunkAPI) => {
+    async(requestData, thunkAPI) => {
+        const { conversationID, oldestMessageDate } = requestData;
+        console.log('Request Data: ', conversationID, oldestMessageDate);
         try {
-            const { success, error, data } = await fetchMessages(conversationID);
+            const { success, error, data } = await fetchMessages(requestData);
             if(!success) return thunkAPI.rejectWithValue(error);
 
-            return data;
+            const hasMore = (data.length > 30);
+            if(hasMore) data.pop();
+            console.log('Datau: ', data);
+            const oldestDate = data[data.length - 1]['created_at'];
+
+            return {log: data, hasMore, oldestDate, conversationID};
         } catch(error) {
             return thunkAPI.rejectWithValue(error);
         }
     }
 );
+
+export const loadOlderMessages = createAsyncThunk(
+    'loadOlderMessages',
+    async(conversationID, thunkAPI) => {
+        const state = thunkAPI.getState();
+        try {
+            const { success, data, error } = await fetchOlderMessages(conversationID, state.oldestLoadedMessageDate);
+            if(!success) return thunkAPI.rejectWithValue(error);
+        } catch(error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+)
 
 const homeSlice = createSlice({
     name: 'home',
@@ -131,6 +152,8 @@ const homeSlice = createSlice({
         outgoingFriendRequests: [],
         currentConversationID: '',
         messageLog: [],
+        hasMoreMessages: false,
+        oldestLoadedMessageDate: '',
         preventAnimation: true,
         isLoading: false,
         hasError: false,
@@ -238,7 +261,7 @@ const homeSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = false;
                 state.message = '';
-                state.messageLog = [...state.messageLog, action.payload];
+                state.messageLog = [action.payload, ...state.messageLog];
                 for(let contact of state.contacts) {
                     if(contact.conversationID === action.payload.conversationID) {
                         contact['last_message'] = action.payload.content;
@@ -260,7 +283,10 @@ const homeSlice = createSlice({
                 state.isLoading = false;
                 state.hasError = false;
                 state.message = '';
-                state.messageLog = action.payload;
+                state.currentConversationID = action.payload.conversationID;
+                state.messageLog = [...state.messageLog, ...action.payload.log];
+                state.oldestLoadedMessageDate = action.payload.oldestDate;
+                state.hasMoreMessages = action.payload.hasMore;
             })
             .addCase(loadMessages.rejected, (state, action) => {
                 state.isLoading = false;

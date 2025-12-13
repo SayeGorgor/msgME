@@ -13,15 +13,18 @@ export default function PendingRequestCard({ requestID, senderID, username }) {
 
     //Functions
     const handleRequestDecision = (decision) => {
-        const decisionInfo = {
-            decision,
-            requestID,
-            senderID,
-            receiverID: session.user.id
-        }
+        if(session) {
+            const decisionInfo = {
+                decision,
+                requestID,
+                senderID,
+                receiverID: session.user.id
+            }
 
-        dispatch(decideOnRequest(decisionInfo));
+            dispatch(decideOnRequest(decisionInfo));
+        }
     }
+    
     return(
         <div className={styles.body}>
             <div className={styles['user-info']}>

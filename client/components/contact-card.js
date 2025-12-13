@@ -22,7 +22,7 @@ export default function ContactCard({ username, lastMessage, conversationID, scr
     const loadConvo = async() => {
         //Clear old message log and load in new log
         dispatch(clearMessageLog());
-        await dispatch(loadMessages(conversationID));
+        await dispatch(loadMessages({conversationID}));
         console.log('Message Log: ', messageLog);
         console.log('User ID: ', session.user.id);
 
@@ -33,8 +33,9 @@ export default function ContactCard({ username, lastMessage, conversationID, scr
 
         //Update the current conversation information
         dispatch(setChattingWith(username));
-        dispatch(setCurrentConversationID(conversationID));
+        await dispatch(setCurrentConversationID(conversationID));
         console.log('Conversation ID: ', conversationID);
+        console.log('Current Conversation ID: ', currentConversationID);
         scrollMessageThreadToBottom();
     }
 

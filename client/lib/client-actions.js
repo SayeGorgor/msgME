@@ -48,12 +48,13 @@ export const supaLogin = async(userID, password) => {
     }
 
     //Grab email using userID
-    const res = await supabaseAuth
+    const { data } = await supabaseAuth
         .from('users')
         .select('email')
-        .eq('username', userID)
+        .eq('username_lower', userID.trim().toLowerCase())
         .single();
-    const email = res.email;
+    console.log('User Data: ', data);
+    const email = data.email;
     //Fail if email isnt found
     if(!email) return {success: false, message: 'Username not found'};
     //Log in with found email
@@ -381,11 +382,57 @@ export const supaInsertNewMessage = async(message) => {
     return {success: true, data: newMediaPath};
 }
 
-export const fetchMessages = async(conversationID) => {
-    const { data, error } = await supabaseAuth
+export const fetchMessages = async(requestInfo) => {
+    const { conversationID, oldestMessageDate } = requestInfo;
+    let data = [];
+
+    if(oldestMessageDate) {
+        const { data:messageData, error } = await supabaseAuth
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conversationID)
+            .lt('created_at', oldestMessageDate)
+            .order('created_at', {ascending: false})
+            .limit(31);
+        if(error) return {success: false, error: error.message};
+
+        data = messageData;
+    } else {
+        const { data:messageData, error } = await supabaseAuth
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conversationID)
+            .order('created_at', {ascending: false})
+            .limit(31);
+        if(error) return {success: false, error: error.message};
+
+        data = messageData;
+    }
+
+    for(let message of data) {
+         if(message['media_path']) {
+            console.log('Image found')
+            const { data:mediaPathData, error:mediaPathError } = await supabaseAuth.storage
+                .from('message_media')
+                .createSignedUrl(message['media_path'], 120);
+            
+            if(mediaPathError) console.log('Media Path Error: ', mediaPathError);
+            console.log('Signed Url: ', mediaPathData.signedUrl);
+            message['media_path'] = mediaPathData.signedUrl;
+        }
+    }
+
+    return {success: true, data};
+}
+
+export const fetchOlderMessages = async(conversationID, oldestMessageDate) => {
+    const { data, error } = supabaseAuth
         .from('messages')
         .select('*')
-        .eq('conversation_id', conversationID);
+        .eq('conversation_id', conversationID)
+        .lt('created_at', oldestMessageDate)
+        .order('created_at', {ascending: false})
+        .limit(31);
     if(error) return {success: false, error: error.message};
 
     for(let message of data) {
@@ -399,25 +446,10 @@ export const fetchMessages = async(conversationID) => {
             if(error) console.log('Media Path Error: ', mediaPathError);
             console.log('Signed Url: ', mediaPathData.signedUrl);
             message['media_path'] = mediaPathData.signedUrl;
-        } else {
-            console.log('No image')
         }
     }
 
-    if(data['media_path']) {
-        console.log('Path found')
-        const { data:mediaPathData, error:mediaPathError } = await supabaseAuth.storage
-            .from('message_media')
-            .createSignedUrl(data['media_path'], 120);
-        
-        if(error) console.log('Media Path Error: ', mediaPathError);
-        console.log('Signed Url: ', mediaPathData.signedUrl);
-        data['media_path'] = mediaPathData.signedUrl;
-    } else {
-        console.log('Yo shit gone')
-    }
-
-    return {success: true, data};
+    return {success: true, data}
 }
 
 export const fetchAccountData = async(userID) => {
@@ -451,4 +483,27 @@ export const supaUpdateAccountInfo = async(userID, newAccountInfo) => {
     if(error) return {success: false, error: error.message};
 
     return {success: true};
+}
+
+export const supaVerifyNewUser = (userInfo) => {
+    const { email, username } = userInfo;
+    if(email) {
+        const { error: emailError } =  supabaseAuth
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+        if(emailError) return {success: true};
+    }
+
+    if(username) {
+        const { error: usernameError } =  supabaseAuth
+            .from('users')
+            .select('*')
+            .eq('username', username)
+            .single();
+        if(usernameError) return {success: true};
+    }
+
+    return {success: false};
 }
