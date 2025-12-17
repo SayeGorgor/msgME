@@ -68,6 +68,9 @@ export const accountSlice = createSlice({
         },
         setHasAccountError: (state, action) => {
             state.hasError = action.payload;
+        },
+        clearAccountData: (state) => {
+            state.accountData = {};
         }
     },
     extraReducers: (builder) => {
@@ -113,7 +116,8 @@ export const accountSlice = createSlice({
 export const { 
     setShowAccountWindow, 
     setAccountMessage,
-    setHasAccountError
+    setHasAccountError,
+    clearAccountData
 } = accountSlice.actions;
 
 export default accountSlice.reducer;

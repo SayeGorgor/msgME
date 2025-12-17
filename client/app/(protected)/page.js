@@ -1,7 +1,8 @@
 'use client';
 
 import { SocketContext } from '@/lib/socket/socket';
-import { supabaseAuth, fetchContacts, fetchUsername } from '../lib/client-actions';
+import { supabaseAuth, fetchContacts, fetchUsername } from '@/lib/client-actions';
+import { supabaseServer } from '@/lib/server-actions';
 import { v4 as uuid } from 'uuid';
 
 import { useState, useEffect, useContext, useRef } from "react";
@@ -9,12 +10,12 @@ import styles from "./page.module.css";
 
 import { useDispatch, useSelector } from "react-redux";
 import { loadAccountData } from '@/lib/redux/slices/accountSlice';
+import { loadFriendRequests } from '@/lib/redux/slices/friendRequestsSlice';
 import { 
   addMessage, 
   clearMessageLog, 
   insertNewMessage, 
-  loadContacts, 
-  loadFriendRequests, 
+  loadContacts,  
   loadMessages, 
   setChattingWith, 
   setMessageLog 
@@ -26,10 +27,11 @@ import {
   setUser 
 } from "@/lib/redux/slices/authSlice";
 
-import MessageCard from '../components/message-card';
-import ContactCard from '../components/contact-card';
+import MessageCard from '@/components/message-card';
+import ContactCard from '@/components/contact-card';
 import ImageIcon from '@/app/(icons)/image_icon.svg';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
+import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
 
 export default function Home() {
   const socket = useContext(SocketContext);
@@ -62,9 +64,9 @@ export default function Home() {
   const [preview, setPreview] = useState('');
 
   //Functions
-  const sendMessage = (e) => {
+  const sendMessage = async(e) => {
     e.preventDefault();
-    if(newMessage) {
+    if(newMessage || mediaPath) {
       const id = uuid();
       const message = {
         id,
@@ -74,8 +76,9 @@ export default function Home() {
         timestamp: new Date().toISOString(),
         mediaPath
       }
-      dispatch(insertNewMessage(message));
+      await dispatch(insertNewMessage(message));
       socket.emit('send_message', message);
+      scrollMessageThreadToBottom();
       setNewMessage('');
       setPreview('');
       setMediaPath('');
@@ -114,6 +117,9 @@ export default function Home() {
   //Effects
   //Grab session on load and auth change
   useEffect(() => {
+    //Close login window on successful login
+    dispatch(setShowLoginWindow(false));
+
     const { data:listener } = supabaseAuth.auth.onAuthStateChange(
       (event, session) => {
         console.log("Auth event:", event, session);
@@ -221,8 +227,7 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      {isAuthorized ? 
-        <main className={styles['authorized-main']}>
+      <main className={styles['authorized-main']}>
           <div className={styles['contacts-section']}>
             <h2 onClick={scrollMessageThreadToBottom}>Contacts</h2>
             <ul className={styles['contact-list']}>
@@ -231,7 +236,7 @@ export default function Home() {
                   <ContactCard 
                     username={contact.username} 
                     pfpPath={contact['pfp_path']}
-                    lastMessage={contact['last_message'] || 'Send them a message!'}
+                    lastMessage={contact['last_message']}
                     conversationID={contact.conversationID} 
                     scrollMessageThreadToBottom={scrollMessageThreadToBottom}
                   />
@@ -315,11 +320,6 @@ export default function Home() {
           }
           </div>
         </main>
-        :
-        <main className={styles['unauthorized-main']}>
-          <h2>Please Log In Or Sign Up To Begin Messaging!</h2>
-        </main>
-      }
     </div>
   );
 }

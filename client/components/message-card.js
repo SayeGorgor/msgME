@@ -25,6 +25,7 @@ export default function MessageCard(props) {
         console.log('Time stamp: ', fullTimestamp);
         console.log('Raw time stamp: ', timestamp);
         console.log('Media Path: ', mediaPath);
+        console.log('Content: ', content)
         setPreventAnimation(false);
         setShowTime(!showTime);
     }
@@ -59,14 +60,16 @@ export default function MessageCard(props) {
                                         <img src={mediaPath} alt='user image' />
                                     </div>
                                 )}
-                                <div className={`
-                                    ${styles.message} 
-                                    ${styles['contact-message']}
-                                    ${showTime ? styles['visible'] : styles['hidden']}
-                                    ${preventAnimation ? styles['no-animation'] : ''}
-                                `}>
-                                    <p>{content}</p>
-                                </div>
+                                {content && (
+                                    <div className={`
+                                        ${styles.message} 
+                                        ${styles['contact-message']}
+                                        ${showTime ? styles['visible'] : styles['hidden']}
+                                        ${preventAnimation ? styles['no-animation'] : ''}
+                                    `}>
+                                        <p>{content}</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </>
@@ -94,14 +97,16 @@ export default function MessageCard(props) {
                                         <img src={mediaPath} alt='user image' />
                                     </div>
                                 )}
-                                <div className={`
-                                    ${styles.message} 
-                                    ${styles['user-message']}
-                                    ${showTime ? styles['visible'] : styles['hidden']}
-                                    ${preventAnimation ? styles['no-animation'] : ''}
-                                `}>
-                                    <p>{content}</p>
-                                </div>
+                                {content && (
+                                    <div className={`
+                                        ${styles.message} 
+                                        ${styles['user-message']}
+                                        ${showTime ? styles['visible'] : styles['hidden']}
+                                        ${preventAnimation ? styles['no-animation'] : ''}
+                                    `}>
+                                        <p>{content}</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <p

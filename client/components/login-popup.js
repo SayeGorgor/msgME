@@ -1,17 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import { redirect, useRouter } from 'next/navigation';
+
 import { useDispatch, useSelector } from 'react-redux';
-import { login, setIsAuthorized, signInWithProvider } from '@/lib/redux/slices/authSlice';
+import { login, setIsAuthorized, setIsLoading, signInWithProvider } from '@/lib/redux/slices/authSlice';
 import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
+import { setHasError, setMessage } from '../lib/redux/slices/authSlice';
+
 import styles from './login-popup.module.css';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import GithubLogo from '@/app/(icons)/github_logo.svg';
 import GoogleLogo from '@/app/(icons)/google_logo.svg';
 import AppleLogo from '@/app/(icons)/apple_logo.svg';
-import { setHasError, setMessage } from '../lib/redux/slices/authSlice';
+import { supaLogin } from '@/lib/server-actions';
 
 export default function LoginPopup() {
+    const router = useRouter();
+    
     //Redux
     const dispatch = useDispatch();
     const showLoginWindow = useSelector(state => state.header.showLoginWindow);
@@ -31,16 +37,16 @@ export default function LoginPopup() {
         setPassword('');
     }
 
-    const attemptLogin = (e) => {
+    const attemptLogin = async(e) => {
         e.preventDefault();
+        dispatch(setHasError(false));
         const credentials = {userID, password};
-        dispatch(login(credentials))
-        .then(res => {
-            if(res.meta.requestStatus === 'fulfilled') {
-                closeLoginWindow();
-            }
-        });
-        setPassword('');
+        dispatch(setIsLoading(true));
+        dispatch(setMessage('Loading...'));
+        await supaLogin(userID, password);
+        dispatch(setIsLoading(false));
+        dispatch(setHasError(true));
+        dispatch(setMessage('Error Logging In'));
     }
 
     return(

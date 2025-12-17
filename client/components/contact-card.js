@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { SocketContext } from '@/lib/socket/socket';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,6 +19,8 @@ export default function ContactCard(props) {
     } = props
     const socket = useContext(SocketContext);
 
+    const [prevLastMessage, setPrevLastMessage] = useState('');
+
     //Redux
     const dispatch = useDispatch();
     const session = useSelector(state => state.auth.session);
@@ -30,8 +32,6 @@ export default function ContactCard(props) {
         //Clear old message log and load in new log
         dispatch(clearMessageLog());
         await dispatch(loadMessages({conversationID}));
-        console.log('Message Log: ', messageLog);
-        console.log('User ID: ', session.user.id);
 
         //Leave the socket room if user is currently in one
         if(currentConversationID) socket.emit('leave_room', currentConversationID);
@@ -45,6 +45,12 @@ export default function ContactCard(props) {
         console.log('Current Conversation ID: ', currentConversationID);
         scrollMessageThreadToBottom();
     }
+
+    //Use Effect
+    //Store previous last message (temp fix for no text image uploads)
+    useEffect(() => {
+        setPrevLastMessage(lastMessage);
+    }, [lastMessage]);
 
     return(
         <div className={styles['contact-card']} onClick={loadConvo}>
@@ -61,7 +67,14 @@ export default function ContactCard(props) {
             </div>
             <div className={styles['contact-info']}>
                 <h3>{username}</h3>
-                <p>{lastMessage}</p>
+                {lastMessage ? 
+                    <p>{lastMessage}</p>
+                    :
+                    prevLastMessage ? 
+                        <p>{prevLastMessage}</p>
+                        :
+                        <p>Send them a message!</p>
+                }
             </div>
         </div>
     );

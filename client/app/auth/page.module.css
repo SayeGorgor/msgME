@@ -1,0 +1,15 @@
+.page {
+  display: flex;
+  min-height: calc(100vh - 5rem);
+  min-height: calc(100svh - 5rem);
+}
+
+.page main {
+  display: flex;
+  height: calc(100vh - 5rem);
+  width: 100%;
+}
+
+.unauthorized-main h2 {
+  margin: auto;
+}

@@ -4,9 +4,9 @@ import styles from './pending-request-card.module.css';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
 import AcceptIcon from '@/app/(icons)/checkmark_icon.svg';
 import RejectIcon from '@/app/(icons)/close_window_icon.svg';
-import { decideOnRequest } from '@/lib/redux/slices/homeSlice';
+import { decideOnRequest } from '@/lib/redux/slices/friendRequestsSlice';
 
-export default function PendingRequestCard({ requestID, senderID, username }) {
+export default function PendingRequestCard({ requestID, senderID, username, pfpPath }) {
     //Redux
     const dispatch = useDispatch();
     const session = useSelector(state => state.auth.session);
@@ -29,7 +29,15 @@ export default function PendingRequestCard({ requestID, senderID, username }) {
         <div className={styles.body}>
             <div className={styles['user-info']}>
                 <div className={styles['pfp-container']}>
-                    <DefaultPFP className={styles.pfp} />
+                    {pfpPath ?
+                        <img 
+                            src={pfpPath}
+                            alt={`${username}'s Profile Picture`}
+                            className={styles.pfp}
+                        />
+                        :
+                        <DefaultPFP className={styles.pfp} />
+                    }
                 </div>
                 <p>{username}</p>
             </div>

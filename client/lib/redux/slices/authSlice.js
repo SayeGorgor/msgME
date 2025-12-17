@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { supaSignup, supaLogin, supaLogout, supabaseAuth } from "@/lib/client-actions";
+import { supaSignup, supaLogout, supabaseAuth } from "@/lib/client-actions";
+import { supaLogin } from "@/lib/server-actions";
 
 export const signup = createAsyncThunk(
     'auth/signup',

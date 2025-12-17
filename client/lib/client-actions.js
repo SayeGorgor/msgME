@@ -1,10 +1,11 @@
 'use client';
 
 import { v4 as uuid } from 'uuid';
+import { createBrowserClient } from '@supabase/ssr';
 import { createClient } from "@supabase/supabase-js";
 import { supaInsert, verifyNewUser } from "./server-actions";
 
-export const supabaseAuth = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_KEY);
+export const supabaseAuth = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_KEY);
 
 export const supaSignup = async(userInfo) => {
     const { email, password, username } = userInfo;
@@ -231,6 +232,25 @@ export const fetchFriendRequests = async(id) => {
         
     if(incomingRequestsError) return {error: incomingRequestsError.message};
 
+    //Get username and signed url
+    for(let request of incomingRequests) {
+        const { data: userInfoData, error: userInfoError } = await fetchRequestUserData(request['sender_id']);
+        if(userInfoError) return {success: false, error: userInfoError.message};
+        request['sender_username'] = userInfoData.username;
+
+        if(userInfoData['pfp_path']) {
+            const { 
+                data: incomingRequestsPFPData, 
+                error: incomingRequestsPFPError 
+            } = await supabaseAuth
+                .storage
+                .from('user_pfps')
+                .createSignedUrl(userInfoData['pfp_path'], 120);
+            if(incomingRequestsPFPError) return {success: false, error: incomingRequestsPFPError.message}
+            request['pfp_path'] = incomingRequestsPFPData.signedUrl;
+        }
+    }
+
     //Fetch outgoing friend requests
     const { data:outgoingRequests , error:outgoingRequestsError } = await supabaseAuth
         .from('requests')
@@ -238,20 +258,41 @@ export const fetchFriendRequests = async(id) => {
         .eq('sender_id', id);
         
     if(outgoingRequestsError) return {error: outgoingRequestsError.message}
+
+    //Get username and signed url
+    for(let request of outgoingRequests) {
+        const { data: userInfoData, error: userInfoError } = await fetchRequestUserData(request['receiver_id']);
+        if(userInfoError) return {success: false, error: userInfoError.message};
+        request['receiver_username'] = userInfoData.username;
+
+        console.log('U might be trippin')
+        if(userInfoData['pfp_path']) {
+            console.log('U not tripping: ', userInfoData['pfp_path']);
+            const { 
+                data: outgoingRequestsPFPData, 
+                error: outgoingRequestsPFPError 
+            } = await supabaseAuth
+                .storage
+                .from('user_pfps')
+                .createSignedUrl(userInfoData['pfp_path'], 120);
+            if(outgoingRequestsPFPError) return {success: false, error: outgoingRequestsPFPError.message}
+            request['pfp_path'] = outgoingRequestsPFPData.signedUrl;
+        }
+    }
     
     return {data: {outgoingRequests, incomingRequests}};
 }
 
-export const fetchUsernameByID = async(id) => {
+export const fetchRequestUserData = async(id) => {
     const { data, error } = await supabaseAuth
         .from('users')
-        .select('username')
+        .select('username, pfp_path')
         .eq('id', id)
         .single();
     
     if(error) return {error: error.message};
 
-    return {data: {username: data.username}};
+    return {data};
 }
 
 export const supaDecideOnRequest = async(decisionInfo) => {
@@ -364,7 +405,7 @@ export const supaInsertNewMessage = async(message) => {
         id: id,
         'conversation_id': conversationID,
         'sender_id': senderID,
-        content: content,
+        ...(content && {content}),
         ...(fileName && {'media_path': fileName})
     }
 
@@ -380,7 +421,7 @@ export const supaInsertNewMessage = async(message) => {
     const { error:conversationError } = await supabaseAuth
         .from('conversations')
         .update({
-            'last_message': message.content,
+            'last_message': content || '1 Attachment',
             'last_message_at': message.timestamp
         })
         .eq('id', message.conversationID)

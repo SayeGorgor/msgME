@@ -34,8 +34,6 @@ export default function RootLayout({ children }) {
         <SocketProvider>
           <ReduxProvider>
             <Header />
-            <LoginPopup />
-            <SignupPopup />
             <IconPopup />
             <AddFriendPopup />
             <NotificationsPopup />

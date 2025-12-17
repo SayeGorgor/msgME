@@ -6,10 +6,11 @@ import styles from './add-friend-popup.module.css';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowAddContactWindow } from '@/lib/redux/slices/headerSlice';
+import { sendRequest } from '@/lib/redux/slices/friendRequestsSlice';
+import { setHomeMessage, setHasHomeError, setIsHomeLoading } from '@/lib/redux/slices/homeSlice';
 
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
-import { setHomeMessage, setHasHomeError, sendRequest, setIsHomeLoading } from '@/lib/redux/slices/homeSlice';
 
 export default function AddFriendPopup() {
     //Use States

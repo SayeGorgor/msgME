@@ -15,18 +15,18 @@
     display: flex;
 }
 
-.pending-requests-section {
+.requests-section {
     display: flex;
     flex-direction: column;
     width: 100%;
 }
 
-.pending-requests-section h2 {
+.requests-section h2 {
     margin-bottom: 1rem;
     margin-left: 1rem;
 }
 
-.pending-requests-list {
+.requests-list {
     list-style: none;
     width: 100%;
 }

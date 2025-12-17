@@ -1,26 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { 
-    insertRequest, 
-    fetchFriendRequests, 
-    fetchUsernameByID, 
-    supaDecideOnRequest,
     supaInsertNewMessage, 
     fetchMessages,
     fetchContacts,
     fetchOlderMessages
 } from '@/lib/client-actions';
-
-export const sendRequest = createAsyncThunk(
-    'home/sendRequest',
-    async(requestInfo, thunkAPI) => {
-        try {
-            const { error } = await insertRequest(requestInfo);
-            if(error) return thunkAPI.rejectWithValue(error);
-        } catch(err) {
-            return thunkAPI.rejectWithValue('Error Sending Request');
-        }
-    }
-);
 
 export const loadContacts = createAsyncThunk(
     'home/loadContacts',
@@ -30,56 +14,6 @@ export const loadContacts = createAsyncThunk(
             if(error) return thunkAPI.rejectWithValue(error);
 
             return data;
-        } catch(error) {
-            return thunkAPI.rejectWithValue(error);
-        }
-    }
-);
-
-export const loadFriendRequests = createAsyncThunk(
-    'home/loadFriendRequests',
-    async(id, thunkAPI) => {
-        let incomingFriendRequests = [];
-        let outgoingFriendRequests = [];
-
-        //Fetch incoming and outgoing requests
-        const { error, data } = await fetchFriendRequests(id);
-        if(error) return thunkAPI.rejectWithValue(error);
-
-        //Filter through incoming requests to grab username and add to list
-        for(let request of data.incomingRequests) {
-            console.log('Sender ID: ', request['sender_id']);
-            const { data, error } = await fetchUsernameByID(request['sender_id']);
-            if(error) {
-                console.log('Filtering Error In Incoming: ', error);
-                return thunkAPI.rejectWithValue(error);
-            }
-            incomingFriendRequests.push({
-                id: request.id, 
-                senderUsername: data.username,
-                senderID: request['sender_id']
-            });
-        }
-
-        //Filter through outgoing requests to grab username and add to list
-        for(let request of data.outgoingRequests) {
-            const { data, error } = await fetchUsernameByID(request['receiver_id']);
-            if(error) return thunkAPI.rejectWithValue(error);
-            outgoingFriendRequests.push({id: request.id, receiverUsername: data.username});
-        }
-
-        return {incomingFriendRequests, outgoingFriendRequests};
-    }
-);
-
-export const decideOnRequest = createAsyncThunk(
-    'home/decideOnRequest',
-    async(decisionInfo, thunkAPI) => {
-        const { requestID } = decisionInfo;
-        try {
-            const { error } = await supaDecideOnRequest(decisionInfo);
-            if(error) return thunkAPI.rejectWithValue(error);
-            return requestID;
         } catch(error) {
             return thunkAPI.rejectWithValue(error);
         }
@@ -121,7 +55,7 @@ export const loadMessages = createAsyncThunk(
             const hasMore = (data.length > 30);
             if(hasMore) data.pop();
             console.log('Datau: ', data);
-            const oldestDate = data[data.length - 1]['created_at'];
+            const oldestDate = (data.length > 0) ? data[data.length - 1]['created_at'] : null;
 
             return {log: data, hasMore, oldestDate, conversationID};
         } catch(error) {
@@ -148,8 +82,6 @@ const homeSlice = createSlice({
     initialState: {
         contacts: [],
         chattingWith: '',
-        incomingFriendRequests: [],
-        outgoingFriendRequests: [],
         currentConversationID: '',
         messageLog: [],
         hasMoreMessages: false,
@@ -172,7 +104,7 @@ const homeSlice = createSlice({
         setCurrentConversationID: (state, action) => {
             state.currentConversationID = action.payload;
         },
-        clearMessageLog: (state, action) => {
+        clearMessageLog: (state) => {
             state.messageLog = [];
         },
         addMessage: (state, action) => {
@@ -183,25 +115,14 @@ const homeSlice = createSlice({
         },
         setPreventAnimation: (state, action) => {
             state.preventAnimation = action.payload;
-        }
+        },
+        clearHomeData: (state) => {
+            state.contacts = [];
+            state.chattingWith = ''
+        } 
     },
     extraReducers: (builder) => {
         builder
-            .addCase(sendRequest.pending, state => {
-                state.isLoading = true;
-                state.hasError = false;
-                state.message = 'Loading...';
-            })
-            .addCase(sendRequest.fulfilled, state => {
-                state.isLoading = false;
-                state.hasError = false;
-                state.message = 'Request Sent!';
-            })
-            .addCase(sendRequest.rejected, (state, action) => {
-                state.isLoading = false;
-                state.hasError = true;
-                state.message = action.payload;
-            })
             .addCase(loadContacts.pending, state => {
                 state.isLoading = true;
                 state.hasError = false;
@@ -214,40 +135,6 @@ const homeSlice = createSlice({
                 state.contacts = action.payload;
             })
             .addCase(loadContacts.rejected, (state, action) => {
-                state.isLoading = false;
-                state.hasError = true;
-                state.message = action.payload;
-            })
-            .addCase(loadFriendRequests.pending, state => {
-                state.isLoading = true;
-                state.hasError = false;
-                state.message = 'Loading Requests...';
-            })
-            .addCase(loadFriendRequests.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.hasError = false;
-                state.message = '';
-                state.incomingFriendRequests = action.payload.incomingFriendRequests;
-                state.outgoingFriendRequests = action.payload.outgoingFriendRequests;
-            })
-            .addCase(loadFriendRequests.rejected, (state, action) => {
-                state.isLoading = false;
-                state.hasError = true;
-                state.message = action.payload;
-            })
-            .addCase(decideOnRequest.pending, state => {
-                state.isLoading = true;
-                state.hasError = false;
-                state.message = '';
-            })
-            .addCase(decideOnRequest.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.hasError = false;
-                state.message = '';
-                state.incomingFriendRequests = state.incomingFriendRequests
-                    .filter(request => request.id !== action.payload);
-            })
-            .addCase(decideOnRequest.rejected, (state, action) => {
                 state.isLoading = false;
                 state.hasError = true;
                 state.message = action.payload;
@@ -303,7 +190,8 @@ export const {
     clearMessageLog,
     addMessage,
     setIsHomeLoading,
-    setPreventAnimation
+    setPreventAnimation,
+    clearHomeData
 } = homeSlice.actions;
 
 export default homeSlice.reducer;

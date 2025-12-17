@@ -28,31 +28,3 @@
   width: 100%;
   object-fit: cover;
 }
-
-.option-icons-list {
-    display: flex;
-    align-items: center;
-    list-style: none;
-    padding: 0;
-    margin-right: .3rem;
-}
-
-.accept-icon {
-    height: 1.5rem;
-    width: auto;
-}
-
-.accept-icon:hover {
-    cursor: pointer;
-    color: blue;
-}
-
-.reject-icon {
-    height: 2rem;
-    width: auto;
-}
-
-.reject-icon:hover {
-    cursor: pointer;
-    color: red;
-}

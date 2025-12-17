@@ -6,8 +6,11 @@ import { setShowAccountOptionsWindow } from '@/lib/redux/slices/headerSlice';
 import styles from './icon-popup.module.css';
 import { logout, setIsAuthorized } from '@/lib/redux/slices/authSlice';
 import { setShowAccountWindow } from '@/lib/redux/slices/accountSlice';
+import { useRouter } from 'next/navigation';
+import { clearHomeData } from '@/lib/redux/slices/homeSlice';
 
 export default function IconPopup() {
+    const router = useRouter();
     const popupRef = useRef(null);
 
     //Redux
@@ -18,6 +21,9 @@ export default function IconPopup() {
     const handleLogout = () => {
         dispatch(logout());
         dispatch(setShowAccountOptionsWindow(false));
+        dispatch(clearHomeData());
+        router.push('/auth');
+        router.refresh();
     }
 
     const openManageAccountWindow = () => {
