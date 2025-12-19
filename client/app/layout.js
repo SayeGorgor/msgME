@@ -4,9 +4,6 @@ import "./globals.css";
 import SocketProvider from "@/lib/socket/socket-provider";
 import ReduxProvider from "@/lib/redux/redux-provider";
 
-import Header from "@/components/header";
-import LoginPopup from "@/components/login-popup";
-import SignupPopup from "@/components/signup-popup";
 import IconPopup from "@/components/icon-popup";
 import AddFriendPopup from "@/components/add-friend-popup";
 import NotificationsPopup from "@/components/notifications-popup";
@@ -33,7 +30,6 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <SocketProvider>
           <ReduxProvider>
-            <Header />
             <IconPopup />
             <AddFriendPopup />
             <NotificationsPopup />

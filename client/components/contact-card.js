@@ -4,7 +4,7 @@ import { useState, useEffect, useContext } from 'react';
 import { SocketContext } from '@/lib/socket/socket';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { loadMessages, setChattingWith, setCurrentConversationID, clearMessageLog } from '../lib/redux/slices/homeSlice';
+import { loadMessages, setChattingWith, setCurrentConversationID, clearMessageLog, setShowNewMessagesPopUp } from '../lib/redux/slices/homeSlice';
 
 import styles from './contact-card.module.css';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
@@ -32,6 +32,7 @@ export default function ContactCard(props) {
         //Clear old message log and load in new log
         dispatch(clearMessageLog());
         await dispatch(loadMessages({conversationID}));
+        dispatch(setShowNewMessagesPopUp(false));
 
         //Leave the socket room if user is currently in one
         if(currentConversationID) socket.emit('leave_room', currentConversationID);

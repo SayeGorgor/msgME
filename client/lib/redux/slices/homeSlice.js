@@ -84,6 +84,7 @@ const homeSlice = createSlice({
         chattingWith: '',
         currentConversationID: '',
         messageLog: [],
+        showNewMessagesPopUp: false,
         hasMoreMessages: false,
         oldestLoadedMessageDate: '',
         preventAnimation: true,
@@ -108,7 +109,7 @@ const homeSlice = createSlice({
             state.messageLog = [];
         },
         addMessage: (state, action) => {
-            state.messageLog = [...state.messageLog, action.payload];
+            state.messageLog = [action.payload, ...state.messageLog];
         },
         setIsHomeLoading: (state, action) => {
             state.isLoading = action.payload;
@@ -119,7 +120,10 @@ const homeSlice = createSlice({
         clearHomeData: (state) => {
             state.contacts = [];
             state.chattingWith = ''
-        } 
+        },
+        setShowNewMessagesPopUp: (state, action) => {
+            state.showNewMessagesPopUp = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -191,7 +195,8 @@ export const {
     addMessage,
     setIsHomeLoading,
     setPreventAnimation,
-    clearHomeData
+    clearHomeData,
+    setShowNewMessagesPopUp
 } = homeSlice.actions;
 
 export default homeSlice.reducer;

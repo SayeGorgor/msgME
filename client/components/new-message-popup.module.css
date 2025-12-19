@@ -1,0 +1,16 @@
+.body {
+    display: none;
+    background-color: lightgray;
+    position: absolute;
+    top: -150%;
+    padding: 1rem;
+    border-radius: 1rem;
+}
+
+.body p {
+    font-size: 1.2rem;
+}
+
+.visible {
+    display: block;
+}

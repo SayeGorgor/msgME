@@ -18,7 +18,8 @@ import {
   loadContacts,  
   loadMessages, 
   setChattingWith, 
-  setMessageLog 
+  setMessageLog, 
+  setShowNewMessagesPopUp
 } from '@/lib/redux/slices/homeSlice';
 import { 
   setIsAuthorized, 
@@ -29,6 +30,7 @@ import {
 
 import MessageCard from '@/components/message-card';
 import ContactCard from '@/components/contact-card';
+import NewMessagePopUp from '@/components/new-message-popup';
 import ImageIcon from '@/app/(icons)/image_icon.svg';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
@@ -62,6 +64,7 @@ export default function Home() {
   const [messages, setMessages] = useState([]);
   const [mediaPath, setMediaPath] = useState('');
   const [preview, setPreview] = useState('');
+  const [initialMount, setInitialMount] = useState(true);
 
   //Functions
   const sendMessage = async(e) => {
@@ -101,17 +104,9 @@ export default function Home() {
     threadRef.current.scrollTo({top: threadRef.current.scrollHeight, behavior: 'auto'});
   }
 
-  const displayImage = async() => {
-    // if(threadRef.current.scrollTop <= (threadRef.current.scrollHeight - 20)) {
-    //   setMediaPath('val');
-    //   setTimeout(scrollMessageThreadToBottom, 100);
-    // } else {
-    //   setMediaPath('val');
-    // }
-    await setMediaPath('val');
-    setTimeout(() => {
-      threadRef.current.scrollTo({top: threadRef.current.scrollHeight, behavior: 'smooth'})
-    }, 0);
+  const closeNewMessagePopUp = (e) => {
+    e.stopPropagation();
+    dispatch(setShowNewMessagesPopUp(false));
   }
 
   //Effects
@@ -158,20 +153,43 @@ export default function Home() {
 
   //Update message log when new message is received
   useEffect(() => {
-    socket.on('received_message', (messageData) => {
+    const handler = (messageData) => {
       console.log('Socket Message: ', messageData);
       dispatch(addMessage(messageData));
-    });
+    }
+
+    socket.on('received_message', handler);
 
     return () => {
-      socket.off();
+      socket.off('received_message', handler);
     }
-  }, []);
+  }, [dispatch]);
 
   //Scroll Message Log to Bottom on Mount(handles refreshes)
   useEffect(() => {
     scrollMessageThreadToBottom();
   }, []);
+
+  //Scroll Message Log to Bottom on Message Received If Near Bottom,
+  //Otherwise Show New Messages Pop Up
+  useEffect(() => {
+    //Do nothing on first mount
+    if(initialMount) {
+      setInitialMount(false);
+      return;
+    }
+
+    const thread = threadRef.current;
+    if(!thread) return;
+
+    const distanceToBottom = 
+      thread.scrollHeight - thread.scrollTop - thread.clientHeight;
+    if(distanceToBottom < 400) {
+      scrollMessageThreadToBottom();
+    } else {
+      dispatch(setShowNewMessagesPopUp(true));
+    }
+  }, [messageLog]);
 
   //Clear Chatting With On Logout
   useEffect(() => {
@@ -250,7 +268,11 @@ export default function Home() {
                 <div className={styles['messaging-section-contact-banner']}>
                   <h2>{chattingWith}</h2>
                 </div>
-                <div className={styles['messaging-section-texts-section']} ref={threadRef}>
+                <div 
+                  className={styles['messaging-section-texts-section']} 
+                  onScroll={closeNewMessagePopUp}
+                  ref={threadRef}
+                >
                   <div ref={threadSentinelRef}></div>
                   <ul className={`
                     ${styles['message-thread']}
@@ -263,8 +285,7 @@ export default function Home() {
                           senderID={message['sender_id']} 
                           content={message.content} 
                           id={message.id} 
-                          timestamp={message['created_at']}
-                          ref={threadRef}
+                          timestamp={message['created_at'] || message.timestamp}
                           mediaPath={message['media_path']}
                         />
                       </li>
@@ -273,6 +294,7 @@ export default function Home() {
                   <div className={styles['message-buffer']}></div>
                 </div>
                 <form className={styles['messaging-section-text-bar']} onSubmit={sendMessage}>
+                  <NewMessagePopUp />
                   <div className={styles['content-section']}>
                     <div 
                       className={`

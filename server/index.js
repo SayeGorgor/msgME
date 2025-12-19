@@ -14,8 +14,8 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     socket.on('send_message', (message) => {
-        const { id, senderID, content } = message;
-        const messageData = { id, senderID, content }
+        const { id, senderID, content, timestamp } = message;
+        const messageData = { id, senderID, content, timestamp }
         console.log('Message Data: ', message);
         socket.to(message.conversationID).emit('received_message', messageData);
     });
