@@ -596,3 +596,22 @@ export const supaVerifyNewUser = (userInfo) => {
 
     return {success: false};
 }
+
+export const friendRequestSearch = async(username) => {
+    const { data:userData, error:userError } = await supabaseAuth
+        .from('users')
+        .select('username, pfp_path')
+        .eq('username', username)
+        .single();
+    if(userError) return {success: false, error: 'User Not Found'}
+
+    if(userData['pfp_path']) {
+        const { data:pfpData, error:pfpError } = await supabaseAuth
+            .storage
+            .from('user_pfps')
+            .createSignedUrl(userData['pfp_path'], 120);
+        userData['pfp_path'] = pfpError ? null : pfpData.signedUrl;
+    }
+
+    return {success: true, data: userData};
+}

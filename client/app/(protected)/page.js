@@ -2,7 +2,7 @@
 
 import { SocketContext } from '@/lib/socket/socket';
 import { supabaseAuth, fetchContacts, fetchUsername } from '@/lib/client-actions';
-import { supabaseServer } from '@/lib/server-actions';
+import { useRouter } from 'next/navigation';
 import { v4 as uuid } from 'uuid';
 
 import { useState, useEffect, useContext, useRef } from "react";
@@ -13,6 +13,7 @@ import { loadAccountData } from '@/lib/redux/slices/accountSlice';
 import { loadFriendRequests } from '@/lib/redux/slices/friendRequestsSlice';
 import { 
   addMessage, 
+  clearHomeData, 
   clearMessageLog, 
   insertNewMessage, 
   loadContacts,  
@@ -22,6 +23,7 @@ import {
   setShowNewMessagesPopUp
 } from '@/lib/redux/slices/homeSlice';
 import { 
+  logout,
   setIsAuthorized, 
   setMessage, 
   setSession, 
@@ -37,6 +39,7 @@ import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
 
 export default function Home() {
   const socket = useContext(SocketContext);
+  const router = useRouter();
 
   //Refs
   const fileInputRef = useRef(null);
@@ -136,15 +139,21 @@ export default function Home() {
           dispatch(loadAccountData(session.user.id));
           dispatch(setIsAuthorized(true));
         } else {
-          dispatch(setIsAuthorized(false));
+          router.push('/auth');
+          router.refresh();
         }
       }
     );
 
     // Load initial session on first render
-    supabaseAuth.auth.getSession().then(({ data }) => {
+    supabaseAuth.auth.getSession().then(({ data, error }) => {
       setSession(data.session);
-      if (data.session) dispatch(setIsAuthorized(true));
+      if(error) {
+        dispatch(logout());
+        dispatch(clearHomeData());
+        router.push('/auth');
+        router.refresh();
+      }
     });
 
     // Cleanup listener
@@ -207,13 +216,7 @@ export default function Home() {
     pendingMessageRef.current.style.height = `${pendingMessageRef.current.scrollHeight}px`;
   }, [newMessage]);
 
-  // useEffect(() => {
-  // if (messageLog.length > 0) {
-  //     scrollMessageThreadToBottom();
-  //   }
-  // }, [messageLog]);
-
-  //Load older messages when near top
+  //Load older messages when near top of message thread
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {

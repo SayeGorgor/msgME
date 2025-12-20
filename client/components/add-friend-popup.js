@@ -1,6 +1,6 @@
 'use client';
 
-import { searchByUsername } from '@/lib/client-actions';
+import { friendRequestSearch, searchByUsername } from '@/lib/client-actions';
 import { useState } from 'react';
 import styles from './add-friend-popup.module.css';
 
@@ -17,6 +17,7 @@ export default function AddFriendPopup() {
     const [username, setUsername] = useState('');
     const [userFound, setUserFound] = useState(false);
     const [foundUsername, setFoundUsername] = useState('');
+    const [foundPfpPath, setFoundPfpPath] = useState('');
     const [userConfirmed, setUserConfirmed] = useState(false);
 
     //Redux
@@ -42,17 +43,17 @@ export default function AddFriendPopup() {
         dispatch(setIsHomeLoading(true));
         dispatch(setHasHomeError(false));
         dispatch(setHomeMessage('Searching...'));
-        const res = await searchByUsername(username);
+        const { success, data, error } = await friendRequestSearch(username);
         dispatch(setIsHomeLoading(false));
-        console.log('New Res: ', res);
-        if(!res.success) {
-            dispatch(setHomeMessage(res.message));
+        if(!success) {
+            dispatch(setHomeMessage(error));
             dispatch(setHasHomeError(true));
-        } else {
-            dispatch(setHomeMessage(''));
-            setFoundUsername(res.data.username);
-            setUserFound(true);
+            return;
         }
+        dispatch(setHomeMessage(''));
+        setFoundUsername(data.username);
+        setFoundPfpPath(data['pfp_path']);
+        setUserFound(true);
     }
 
     const sendFriendRequest = () => {
@@ -95,7 +96,15 @@ export default function AddFriendPopup() {
                         <h3>Is This User Correct?</h3>
                         <div className={styles['user-card']}>
                             <div className={styles['pfp-container']}>
-                                <DefaultPFP className={styles.pfp} />
+                                {foundPfpPath ? 
+                                    <img 
+                                        src={foundPfpPath}
+                                        alt={`${foundUsername}'s Profile Picture`}
+                                        className={styles.pfp}
+                                    />
+                                    :
+                                    <DefaultPFP className={styles.pfp} />
+                                }
                             </div>
                             <div className={styles['username']}>
                                 <h4>{foundUsername}</h4>
