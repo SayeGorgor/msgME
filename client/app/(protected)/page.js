@@ -21,7 +21,7 @@ import {
   setChattingWith, 
   setMessageLog, 
   setShowNewMessagesPopUp
-} from '@/lib/redux/slices/homeSlice';
+} from '@/lib/redux/slices/messagesSlice';
 import { 
   logout,
   setIsAuthorized, 
@@ -32,6 +32,7 @@ import {
 
 import MessageCard from '@/components/message-card';
 import ContactCard from '@/components/contact-card';
+import ContactsSection from '@/components/contacts-section';
 import NewMessagePopUp from '@/components/new-message-popup';
 import ImageIcon from '@/app/(icons)/image_icon.svg';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
@@ -54,13 +55,13 @@ export default function Home() {
   const user = useSelector(state => state.auth.user);
   const session = useSelector(state => state.auth.session);
 
-  const chattingWith = useSelector(state => state.home.chattingWith);
-  const contacts = useSelector(state => state.home.contacts);
-  const currentConversationID = useSelector(state => state.home.currentConversationID);
-  const messageLog = useSelector(state => state.home.messageLog);
-  const isLoading = useSelector(state => state.home.isLoading);
-  const hasMoreMessages = useSelector(state => state.home.hasMoreMessages);
-  const oldestLoadedMessageDate = useSelector(state => state.home.oldestLoadedMessageDate);
+  const chattingWith = useSelector(state => state.messages.chattingWith);
+  const contacts = useSelector(state => state.messages.contacts);
+  const currentConversationID = useSelector(state => state.messages.currentConversationID);
+  const messageLog = useSelector(state => state.messages.messageLog);
+  const isLoading = useSelector(state => state.messages.isLoading);
+  const hasMoreMessages = useSelector(state => state.messages.hasMoreMessages);
+  const oldestLoadedMessageDate = useSelector(state => state.messages.oldestLoadedMessageDate);
 
   //States
   const [newMessage, setNewMessage] = useState('');
@@ -118,46 +119,59 @@ export default function Home() {
     //Close login window on successful login
     dispatch(setShowLoginWindow(false));
 
-    const { data:listener } = supabaseAuth.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Auth event:", event, session);
+    // const { data:listener } = supabaseAuth.auth.onAuthStateChange(
+    //   (event, session) => {
+    //     console.log("Auth event:", event, session);
 
-        dispatch(setSession(session));
+    //     dispatch(setSession(session));
 
-        //Load user info if valid session
-        if (session) {
-          //Fetch username
-          fetchUsername(session.user.email)
-          .then(res => {
-            if(res.success) dispatch(setUser(res.username));
-          });
-          //Fetch Contacts
-          dispatch(loadContacts(session.user.id));
-          //Fetch friend requests
-          dispatch(loadFriendRequests(session.user.id));
-          //Fetch account data
-          dispatch(loadAccountData(session.user.id));
-          dispatch(setIsAuthorized(true));
-        } else {
-          router.push('/auth');
-          router.refresh();
-        }
-      }
-    );
+    //     //Load user info if valid session
+    //     if (session) {
+    //       //Fetch username
+    //       fetchUsername(session.user.email)
+    //       .then(res => {
+    //         if(res.success) dispatch(setUser(res.username));
+    //       });
+    //       //Fetch Contacts
+    //       dispatch(loadContacts(session.user.id));
+    //       //Fetch friend requests
+    //       dispatch(loadFriendRequests(session.user.id));
+    //       //Fetch account data
+    //       dispatch(loadAccountData(session.user.id));
+    //       dispatch(setIsAuthorized(true));
+    //     } else {
+    //       router.push('/auth');
+    //       router.refresh();
+    //     }
+    //   }
+    // );
 
     // Load initial session on first render
     supabaseAuth.auth.getSession().then(({ data, error }) => {
-      setSession(data.session);
       if(error) {
         dispatch(logout());
         dispatch(clearHomeData());
         router.push('/auth');
         router.refresh();
       }
+
+      const session = data.session;
+      dispatch(setSession(session));
+      //Fetch username
+      fetchUsername(session.user.email)
+      .then(res => {
+        if(res.success) dispatch(setUser(res.username));
+      });
+      //Fetch Contacts
+      dispatch(loadContacts(session.user.id));
+      //Fetch friend requests
+      dispatch(loadFriendRequests(session.user.id));
+      //Fetch account data
+      dispatch(loadAccountData(session.user.id));
     });
 
     // Cleanup listener
-    return () => listener.subscription.unsubscribe();
+    // return () => listener.subscription.unsubscribe();
   }, []);
 
   //Update message log when new message is received
@@ -208,6 +222,13 @@ export default function Home() {
     }
   }, [user]);
 
+  //Scroll thread to bottom when new conversation is loaded
+  useEffect(() => {
+    if(!currentConversationID) return;
+    
+    scrollMessageThreadToBottom();
+  }, [currentConversationID])
+
   //Dynamically resize pending message text area
   useEffect(() => {
     if(!pendingMessageRef.current) return;
@@ -249,22 +270,7 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles['authorized-main']}>
-          <div className={styles['contacts-section']}>
-            <h2 onClick={scrollMessageThreadToBottom}>Contacts</h2>
-            <ul className={styles['contact-list']}>
-              {contacts.map(contact => (
-                <li key={contact.id}>
-                  <ContactCard 
-                    username={contact.username} 
-                    pfpPath={contact['pfp_path']}
-                    lastMessage={contact['last_message']}
-                    conversationID={contact.conversationID} 
-                    scrollMessageThreadToBottom={scrollMessageThreadToBottom}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ContactsSection scrollMessageThreadToBottom={scrollMessageThreadToBottom} />
           <div className={styles['messaging-section']}>
             {chattingWith ? (
               <>

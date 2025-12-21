@@ -26,25 +26,6 @@
   width: 100%;
 }
 
-/* CONTACTS SECTION */
-
-.contacts-section {
-  display: flex;
-  flex-direction: column;
-  flex: .67;
-  background-color: rgb(201, 239, 255);
-  border-right: 1px solid rgb(169, 202, 216);
-}
-
-.contacts-section h2 {
-  font-size: 1.8rem;
-  margin: .8rem auto;
-}
-
-.contacts-section h3 {
-  font-size: 1.2rem;
-}
-
 /* MESSAGING SECTION */
 
 .messaging-section {

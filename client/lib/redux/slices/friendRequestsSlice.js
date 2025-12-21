@@ -57,13 +57,13 @@ export const friendRequestsSlice = createSlice({
         isLoading: false,
     },
     reducers: {
-        setFriendRequestsMessage: (state, action) => {
+        setFriendRequestMessage: (state, action) => {
             state.message = action.payload
         },
-        setHasFriendRequestsError: (state, action) => {
+        setHasFriendRequestError: (state, action) => {
             state.hasError = action.payload
         },
-        setFriendRequestsLoading: (state, action) => {
+        setIsFriendRequestLoading: (state, action) => {
             state.isLoading = action.payload
         },
     },
@@ -72,7 +72,7 @@ export const friendRequestsSlice = createSlice({
             .addCase(sendRequest.pending, state => {
                 state.isLoading = true;
                 state.hasError = false;
-                state.message = 'Loading...';
+                state.message = 'Sending...';
             })
             .addCase(sendRequest.fulfilled, state => {
                 state.isLoading = false;
@@ -87,7 +87,7 @@ export const friendRequestsSlice = createSlice({
             .addCase(loadFriendRequests.pending, state => {
                 state.isLoading = true;
                 state.hasError = false;
-                state.message = 'Loading Requests...';
+                state.message = '';
             })
             .addCase(loadFriendRequests.fulfilled, (state, action) => {
                 state.isLoading = false;
@@ -122,9 +122,9 @@ export const friendRequestsSlice = createSlice({
 })
 
 export const {
-    setFriendRequestsLoading,
-    setFriendRequestsMessage,
-    setHasFriendRequestsError
+    setIsFriendRequestLoading,
+    setFriendRequestMessage,
+    setHasFriendRequestError
 } = friendRequestsSlice.actions;
 
 export default friendRequestsSlice.reducer;

@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux';
 import styles from './new-message-popup.module.css';
 
 export default function NewMessagePopUp() {
-    const showNewMessagesPopUp = useSelector(state => state.home.showNewMessagesPopUp);
+    const showNewMessagesPopUp = useSelector(state => state.messages.showNewMessagesPopUp);
     return(
         <div className={`
             ${styles.body}

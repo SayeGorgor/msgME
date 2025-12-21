@@ -31,7 +31,7 @@ export default function HeaderAuth() {
     return(
         <header className={styles.body}>
             <h3>msgME</h3>
-            <h2>Welcome, {user}</h2>
+            {/* <h2>Welcome, {user}</h2> */}
             <ul className={styles['user-options-list']}>
                 <li>
                     <NotificationIcon 

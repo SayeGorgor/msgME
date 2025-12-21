@@ -6,8 +6,7 @@ import styles from './add-friend-popup.module.css';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowAddContactWindow } from '@/lib/redux/slices/headerSlice';
-import { sendRequest } from '@/lib/redux/slices/friendRequestsSlice';
-import { setHomeMessage, setHasHomeError, setIsHomeLoading } from '@/lib/redux/slices/homeSlice';
+import { sendRequest, setHasFriendRequestError, setIsFriendRequestLoading, setFriendRequestMessage } from '@/lib/redux/slices/friendRequestsSlice';
 
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
@@ -18,39 +17,38 @@ export default function AddFriendPopup() {
     const [userFound, setUserFound] = useState(false);
     const [foundUsername, setFoundUsername] = useState('');
     const [foundPfpPath, setFoundPfpPath] = useState('');
-    const [userConfirmed, setUserConfirmed] = useState(false);
 
     //Redux
     const dispatch = useDispatch();
     const showAddContactWindow = useSelector(state => state.header.showAddContactWindow);
     const session = useSelector(state => state.auth.session);
-    const isLoading = useSelector(state => state.home.isLoading);
-    const hasError = useSelector(state => state.home.hasError);
-    const homeMessage = useSelector(state => state.home.message);
+    const isLoading = useSelector(state => state.friendRequests.isLoading);
+    const hasError = useSelector(state => state.friendRequests.hasError);
+    const message = useSelector(state => state.friendRequests.message);
 
     //Functions
     const closeWindow = () => {
         dispatch(setShowAddContactWindow(false));
         setUsername('');
         setUserFound(false);
-        dispatch(setHasHomeError(false));
-        dispatch(setHomeMessage(''));
+        dispatch(setHasFriendRequestError(false));
+        dispatch(setFriendRequestMessage(''));
     }
 
     const lookupUser = async(e) => {
         e.preventDefault();
         setUserFound(false);
-        dispatch(setIsHomeLoading(true));
-        dispatch(setHasHomeError(false));
-        dispatch(setHomeMessage('Searching...'));
+        dispatch(setIsFriendRequestLoading(true));
+        dispatch(setHasFriendRequestError(false));
+        dispatch(setFriendRequestMessage('Searching...'));
         const { success, data, error } = await friendRequestSearch(username);
-        dispatch(setIsHomeLoading(false));
+        dispatch(setIsFriendRequestLoading(false));
         if(!success) {
-            dispatch(setHomeMessage(error));
-            dispatch(setHasHomeError(true));
+            dispatch(setFriendRequestMessage(error));
+            dispatch(setHasFriendRequestError(true));
             return;
         }
-        dispatch(setHomeMessage(''));
+        dispatch(setFriendRequestMessage(''));
         setFoundUsername(data.username);
         setFoundPfpPath(data['pfp_path']);
         setUserFound(true);
@@ -72,13 +70,13 @@ export default function AddFriendPopup() {
                     onClick={closeWindow}
                 />
                 <h2>Add Friend</h2>
-                {homeMessage && 
+                {message && 
                     <p className={`
                         ${styles.message} 
                         ${hasError ? styles.error : styles.success}
                         ${isLoading ? styles.loading : ''}
                     `}>
-                        {homeMessage}
+                        {message}
                     </p>
                 }
                 <form className={styles['add-contact-form']} onSubmit={lookupUser}>

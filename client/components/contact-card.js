@@ -4,7 +4,7 @@ import { useState, useEffect, useContext } from 'react';
 import { SocketContext } from '@/lib/socket/socket';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { loadMessages, setChattingWith, setCurrentConversationID, clearMessageLog, setShowNewMessagesPopUp } from '../lib/redux/slices/homeSlice';
+import { loadMessages, setChattingWith, setCurrentConversationID, clearMessageLog, setShowNewMessagesPopUp } from '../lib/redux/slices/messagesSlice';
 
 import styles from './contact-card.module.css';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
@@ -24,8 +24,8 @@ export default function ContactCard(props) {
     //Redux
     const dispatch = useDispatch();
     const session = useSelector(state => state.auth.session);
-    const currentConversationID = useSelector(state => state.home.currentConversationID);
-    const messageLog = useSelector(state => state.home.messageLog);
+    const currentConversationID = useSelector(state => state.messages.currentConversationID);
+    const messageLog = useSelector(state => state.messages.messageLog);
     
     //Load Conversation
     const loadConvo = async() => {
@@ -44,7 +44,6 @@ export default function ContactCard(props) {
         dispatch(setCurrentConversationID(conversationID));
         console.log('Conversation ID: ', conversationID);
         console.log('Current Conversation ID: ', currentConversationID);
-        scrollMessageThreadToBottom();
     }
 
     //Use Effect
