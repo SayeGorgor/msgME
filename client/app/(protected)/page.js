@@ -19,6 +19,7 @@ import {
   loadContacts,  
   loadMessages, 
   setChattingWith, 
+  setCurrentConversationID, 
   setMessageLog, 
   setShowNewMessagesPopUp
 } from '@/lib/redux/slices/messagesSlice';
@@ -36,6 +37,7 @@ import ContactsSection from '@/components/contacts-section';
 import NewMessagePopUp from '@/components/new-message-popup';
 import ImageIcon from '@/app/(icons)/image_icon.svg';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
+import ShowContactsIcon from '@/app/(icons)/back_arrow_icon.svg';
 import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
 
 export default function Home() {
@@ -111,6 +113,12 @@ export default function Home() {
   const closeNewMessagePopUp = (e) => {
     e.stopPropagation();
     dispatch(setShowNewMessagesPopUp(false));
+  }
+
+  const closeOutConversation = () => {
+    dispatch(setChattingWith(''));
+    dispatch(setCurrentConversationID(''));
+    dispatch(clearMessageLog());
   }
 
   //Effects
@@ -270,11 +278,22 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles['authorized-main']}>
-          <ContactsSection scrollMessageThreadToBottom={scrollMessageThreadToBottom} />
+          <div className={styles['contacts-section-larger-view-wrapper']}>
+            <ContactsSection scrollMessageThreadToBottom={scrollMessageThreadToBottom} />
+          </div>
           <div className={styles['messaging-section']}>
             {chattingWith ? (
               <>
                 <div className={styles['messaging-section-contact-banner']}>
+                  <button 
+                    className={`
+                      ${styles['show-contacts-button']}
+                      ${styles['mobile-view']}
+                    `}
+                    onClick={closeOutConversation}
+                  >
+                    <ShowContactsIcon className={styles['show-contacts-icon']}/>
+                  </button>
                   <h2>{chattingWith}</h2>
                 </div>
                 <div 
@@ -302,19 +321,24 @@ export default function Home() {
                   </ul>
                   <div className={styles['message-buffer']}></div>
                 </div>
-                <form className={styles['messaging-section-text-bar']} onSubmit={sendMessage}>
+                <form 
+                  className={styles['messaging-section-text-bar']} 
+                  onSubmit={sendMessage}
+                >
                   <NewMessagePopUp />
                   <div className={styles['content-section']}>
                     <div 
                       className={`
                         ${styles['image-section']} 
                         ${preview ? styles['visible'] : ''}
-                      `}>
+                      `}
+                    >
                       <div 
                         className={`
-                        ${styles['image-container']} 
-                        ${preview ? styles['visible'] : ''}
-                      `}>
+                          ${styles['image-container']} 
+                          ${preview ? styles['visible'] : ''}
+                        `}
+                      >
                         <div className={styles['close-window-icon']} onClick={() => setPreview('')}>
                           <CloseWindowIcon className={styles['close-window-icon-image']} />
                         </div>
@@ -329,7 +353,11 @@ export default function Home() {
                       ref={pendingMessageRef}
                       rows={1}
                       placeholder="Type Message..."
-                      className={preview ? styles['image-view'] : ''}
+                      className={`
+                        ${styles['content-input']}
+                        ${preview ? styles['image-view'] : ''}
+                        ${styles['mobile-view']}
+                      `}
                     />
                   </div>
                   <div 
@@ -344,10 +372,25 @@ export default function Home() {
               </>
             )
             :
-            <div className={styles['welcome-text']}>
-              <h2>Welcome to msgME!</h2>
-              <p>Add friends or click on a friend to start messaging!</p>
-            </div>
+            contacts ? (
+              <>
+                <div className={styles['contacts-section-smaller-view-wrapper']}>
+                  <ContactsSection />
+                </div>
+                <div className={`
+                  ${styles['welcome-text']}
+                  ${styles['welcome-text-larger-view-wrapper']}
+                `}>
+                  <h2>Welcome to msgME!</h2>
+                  <p>Add friends or click on a friend to start messaging!</p>
+                </div>
+              </>
+            ) : (
+              <div className={styles['welcome-text']}>
+                <h2>Welcome to msgME!</h2>
+                <p>Add friends or click on a friend to start messaging!</p>
+              </div>
+            )
           }
           </div>
         </main>

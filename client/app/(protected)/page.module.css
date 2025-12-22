@@ -69,10 +69,21 @@
   font-size: 1.3rem;
 }
 
+.contacts-section-smaller-view-wrapper {
+  display: none;
+}
+
+.contacts-section-larger-view-wrapper {
+  display: flex;
+  flex: .67;
+  height: 100%;
+}
+
 /* CONTACT BANNER */
 
 .messaging-section-contact-banner {
   display: flex;
+  position: relative;
   width: 100%;
   border-bottom: 1px solid lightgray;
 }
@@ -87,6 +98,28 @@
   overflow-y: auto;
 }
 
+.show-contacts-button {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 1%;
+  transform: translateY(-50%);
+  height: 1.7rem;
+  width: 1.7rem;
+  border: none;
+  background-color: transparent;
+}
+
+.show-contacts-button:hover {
+  cursor: pointer;
+}
+
+.show-contacts-icon {
+  height: 100%;
+  width: 100%;
+  color: rgb(0, 183, 255);
+}
+
 /* TEXT BAR */
 .messaging-section-text-bar {
   display: flex;
@@ -98,23 +131,6 @@
   padding-bottom: 1rem;
   backdrop-filter: blur(10px);
   z-index: 2;
-}
-
-.messaging-section-text-bar textarea {
-  display: flex;
-  justify-content: end;
-  line-height: 1.4;
-  padding: .5rem;
-  font-size: 1rem;
-  width: 30rem;
-  padding-left: .5rem;
-  border-radius: .5rem 0 0 .5rem;
-  border: 2px solid gray;
-}
-
-.messaging-section-text-bar textarea.image-view {
-  border-radius: 0 0 0 .5rem;
-  border-top: none;
 }
 
 .messaging-section-text-bar button {
@@ -135,6 +151,24 @@
 .messaging-section-text-bar button:active {
   background-color: rgb(0, 111, 155);
   border: 2px solid rgb(0, 111, 155);
+}
+
+.content-input {
+  display: flex;
+  justify-content: end;
+  line-height: 1.4;
+  padding: .5rem;
+  font-size: 1rem;
+  /* width: 30rem; */
+  width: clamp(15rem, calc(35vw + 1rem), 30rem);
+  padding-left: .5rem;
+  border-radius: .5rem 0 0 .5rem;
+  border: 2px solid gray;
+}
+
+.content-input.image-view {
+  border-radius: 0 0 0 .5rem;
+  border-top: none;
 }
 
 .content-section {
@@ -233,3 +267,35 @@
   color: white;
 }
 
+/* MEDIA QUERIES */
+/* @media(max-width: 1250px) {
+  .messaging-section-text-bar {
+    background-color: green;
+  }
+} */
+
+@media(max-width: 820px) {
+  /* .messaging-section-text-bar {
+    background-color: green;
+  } */
+  .content-input.mobile-view {
+    width: calc(42vw + 5rem);
+  }
+
+  .show-contacts-button.mobile-view {
+    display: block;
+  }
+
+  .contacts-section-smaller-view-wrapper {
+    display: block;
+    height: 100%;
+  }
+
+  .contacts-section-larger-view-wrapper {
+    display: none;
+  }
+
+  .welcome-text-larger-view-wrapper {
+    display: none;
+  }
+}

@@ -11,7 +11,7 @@ export default function ContactsSection({ scrollMessageThreadToBottom }) {
     const contactsLoading = useSelector(state => state.messages.contactsLoading);
 
     return(
-        <div className={styles.body}>
+        <div className={`${styles.body} ${styles['mobile-view']}`}>
             <h2>Contacts</h2>
             {contactsLoading ? 
                 <LoadingAnimation className={styles['loading-animation']} />
