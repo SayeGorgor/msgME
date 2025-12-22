@@ -44,3 +44,10 @@
     cursor: pointer;
     background-color: red;
 }
+
+/* MEDIA QUERIES */
+@media(max-width: 480px) {
+    .body {
+        left: 0;
+    }
+}

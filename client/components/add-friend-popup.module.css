@@ -36,6 +36,11 @@
     border: none;
     border-radius: .5rem;
     background-color: rgb(0, 183, 255);
+    color: black;
+}
+
+.add-user-btn {
+    color: black;
 }
 
 .add-contact-form button:hover,
@@ -146,5 +151,11 @@
 @media(max-width: 480px) {
     .body {
         width: 80%;
+    }
+
+    .message {
+        /* font-size: 1rem; */
+        max-width: 80%;
+        text-align: center;
     }
 }
