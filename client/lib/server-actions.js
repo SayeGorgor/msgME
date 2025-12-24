@@ -44,7 +44,8 @@ export const supaLogin = async(userID, password) => {
 
         const { data: {user} } = await supabaseServerClient.auth.getUser()
         console.log('Auth Events: ', user);
-        // return {success: true, data: {user: await supabaseServerClient.auth.getUser(), test: '1'}}
+        
+        redirect('/');
     }
 
     //Grab email using userID
