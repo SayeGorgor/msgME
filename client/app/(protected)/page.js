@@ -32,7 +32,6 @@ import {
 } from "@/lib/redux/slices/authSlice";
 
 import MessageCard from '@/components/message-card';
-import ContactCard from '@/components/contact-card';
 import ContactsSection from '@/components/contacts-section';
 import NewMessagePopUp from '@/components/new-message-popup';
 import ImageIcon from '@/app/(icons)/image_icon.svg';
@@ -94,8 +93,16 @@ export default function Home() {
     }
   }
 
-  const uploadImage = (e) => {
+  const uploadImage = async(e) => {
     const file = e.target.files[0];
+    //Convert iphone images to jpeg
+    if(file?.type === 'image/heic' || file?.name.endsWith('.heic')) {
+      const convertedImage = await heicToJpeg(file);
+      setMediaPath(convertedImage);
+      setPreview(URL.createObjectURL(convertedImage));
+    }
+
+    //Set current media path to uploaded image if file is accepted
     if(file?.type === 'image/jpeg' || 
        file?.type === 'image/png' ||
        file?.type === 'image/webp') {
@@ -126,33 +133,6 @@ export default function Home() {
   useEffect(() => {
     //Close login window on successful login
     dispatch(setShowLoginWindow(false));
-
-    // const { data:listener } = supabaseAuth.auth.onAuthStateChange(
-    //   (event, session) => {
-    //     console.log("Auth event:", event, session);
-
-    //     dispatch(setSession(session));
-
-    //     //Load user info if valid session
-    //     if (session) {
-    //       //Fetch username
-    //       fetchUsername(session.user.email)
-    //       .then(res => {
-    //         if(res.success) dispatch(setUser(res.username));
-    //       });
-    //       //Fetch Contacts
-    //       dispatch(loadContacts(session.user.id));
-    //       //Fetch friend requests
-    //       dispatch(loadFriendRequests(session.user.id));
-    //       //Fetch account data
-    //       dispatch(loadAccountData(session.user.id));
-    //       dispatch(setIsAuthorized(true));
-    //     } else {
-    //       router.push('/auth');
-    //       router.refresh();
-    //     }
-    //   }
-    // );
 
     // Load initial session on first render
     supabaseAuth.auth.getSession().then(({ data, error }) => {
@@ -191,9 +171,7 @@ export default function Home() {
 
     socket.on('received_message', handler);
 
-    return () => {
-      socket.off('received_message', handler);
-    }
+    return () => socket.off('received_message', handler);
   }, [dispatch]);
 
   //Scroll Message Log to Bottom on Mount(handles refreshes)

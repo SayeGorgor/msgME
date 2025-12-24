@@ -14,10 +14,14 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     socket.on('send_message', (message) => {
-        const { id, senderID, content, timestamp } = message;
+        const { id, senderID, content, timestamp, conversationID } = message;
         const messageData = { id, senderID, content, timestamp }
         console.log('Message Data: ', message);
-        socket.to(message.conversationID).emit('received_message', messageData);
+        socket.to(conversationID).emit('received_message', messageData);
+        io.to(conversationID).emit('update_last_message', {
+            newLastMessage: content,
+            conversationIDCheck: conversationID
+        });
     });
 
     socket.on('join_room', (conversationID) => {

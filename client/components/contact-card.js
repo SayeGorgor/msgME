@@ -16,10 +16,10 @@ export default function ContactCard(props) {
         conversationID, 
         scrollMessageThreadToBottom,
         pfpPath
-    } = props
+    } = props;
     const socket = useContext(SocketContext);
 
-    const [prevLastMessage, setPrevLastMessage] = useState('');
+    const [prevLastMessage, setPrevLastMessage] = useState(lastMessage);
 
     //Redux
     const dispatch = useDispatch();
@@ -52,6 +52,23 @@ export default function ContactCard(props) {
         setPrevLastMessage(lastMessage);
     }, [lastMessage]);
 
+    //Update last message when user receives message
+    useEffect(() => {
+        const handler = (lastMessageData) => {
+            const { newLastMessage, conversationIDCheck } = lastMessageData;
+            console.log('Update Convo: ', newLastMessage);
+            console.log('ConvoID: ', conversationID);
+            console.log('ConvoID Check: ', conversationIDCheck);
+            if(conversationID === conversationIDCheck) {
+                setPrevLastMessage(newLastMessage);
+            }
+        };
+
+        socket.on('update_last_message', handler);
+
+        return () => socket.off('update_last_message', handler);
+    }, []);
+
     return(
         <div className={styles['contact-card']} onClick={loadConvo}>
             <div className={styles['pfp-container']}>
@@ -67,13 +84,10 @@ export default function ContactCard(props) {
             </div>
             <div className={styles['contact-info']}>
                 <h3>{username}</h3>
-                {lastMessage ? 
-                    <p>{lastMessage}</p>
+                {prevLastMessage ? 
+                    <p>{prevLastMessage}</p>
                     :
-                    prevLastMessage ? 
-                        <p>{prevLastMessage}</p>
-                        :
-                        <p>Send them a message!</p>
+                    <p>Send them a message!</p>
                 }
             </div>
         </div>
