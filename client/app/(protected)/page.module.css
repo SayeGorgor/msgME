@@ -106,6 +106,7 @@
   transform: translateY(-50%);
   height: 1.7rem;
   width: 1.7rem;
+  color: black;
   border: none;
   background-color: transparent;
 }
@@ -118,6 +119,7 @@
   height: 100%;
   width: 100%;
   color: rgb(0, 183, 255);
+  transform: rotate(180deg);
 }
 
 /* TEXT BAR */

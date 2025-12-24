@@ -43,10 +43,10 @@ export default function LoginPopup() {
         const credentials = {userID, password};
         dispatch(setIsLoading(true));
         dispatch(setMessage('Loading...'));
-        await supaLogin(userID, password);
+        const { error } = await supaLogin(userID, password);
         dispatch(setIsLoading(false));
         dispatch(setHasError(true));
-        dispatch(setMessage('Error Logging In'));
+        dispatch(setMessage(error));
     }
 
     return(

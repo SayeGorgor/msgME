@@ -40,12 +40,10 @@ export const supaLogin = async(userID, password) => {
         const {error} = await supabaseServerClient
             .auth
             .signInWithPassword({email: userID, password});
-        if(error) return {success: false, message: error.message};
+        if(error) return {success: false, error: error.message};
 
         const { data: {user} } = await supabaseServerClient.auth.getUser()
         console.log('Auth Events: ', user);
-
-        redirect('/');
         // return {success: true, data: {user: await supabaseServerClient.auth.getUser(), test: '1'}}
     }
 
@@ -58,12 +56,12 @@ export const supaLogin = async(userID, password) => {
     console.log('User Data: ', data);
     const email = data.email;
     //Fail if email isnt found
-    if(!email) return {success: false, message: 'Username not found'};
+    if(!email) return {success: false, error: 'Username not found'};
     //Log in with found email
     const {error} = await supabaseServerClient.auth.signInWithPassword({email, password});
-    if(error) return {success: false, message: error.message};
+    if(error) return {success: false, error: error.message};
 
-    return {success: true, data: {user: supabaseServerClient.auth.getUser(), test: '1'}};
+    redirect('/');
 }
 
 export const supaInsert = async (userInfo) => {
