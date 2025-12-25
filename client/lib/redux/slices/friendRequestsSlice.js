@@ -22,12 +22,7 @@ export const loadFriendRequests = createAsyncThunk(
     async(id, thunkAPI) => {
         //Fetch incoming and outgoing requests
         const { error, data } = await fetchFriendRequests(id);
-        if(error) {
-            console.log('Request Error: ', error);
-            return thunkAPI.rejectWithValue(error);
-        }
-
-        console.log('Request Data: ', data);
+        if(error) return thunkAPI.rejectWithValue(error);
 
         return data;
     }

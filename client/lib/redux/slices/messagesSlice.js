@@ -28,7 +28,6 @@ export const insertNewMessage = createAsyncThunk(
             const { success, data, error } = await supaInsertNewMessage(message);
             if(!success) return thunkAPI.rejectWithValue(error);
 
-            console.log('Returned Shit: ', content, senderID, id);
             return { 
                 content, 
                 id, 
@@ -46,16 +45,15 @@ export const insertNewMessage = createAsyncThunk(
 export const loadMessages = createAsyncThunk(
     'messages/loadMessages',
     async(requestData, thunkAPI) => {
-        const { conversationID, oldestMessageDate } = requestData;
-        console.log('Request Data: ', conversationID, oldestMessageDate);
+        const { conversationID } = requestData;
         try {
             const { success, error, data } = await fetchMessages(requestData);
             if(!success) return thunkAPI.rejectWithValue(error);
 
             const hasMore = (data.length > 30);
             if(hasMore) data.pop();
-            console.log('Datau: ', data);
-            const oldestDate = (data.length > 0) ? data[data.length - 1]['created_at'] : null;
+            const oldestDate = (data.length > 0) ? 
+                data[data.length - 1]['created_at'] : null;
 
             return {log: data, hasMore, oldestDate, conversationID};
         } catch(error) {
@@ -69,7 +67,10 @@ export const loadOlderMessages = createAsyncThunk(
     async(conversationID, thunkAPI) => {
         const state = thunkAPI.getState();
         try {
-            const { success, data, error } = await fetchOlderMessages(conversationID, state.oldestLoadedMessageDate);
+            const { success, error } = await fetchOlderMessages(
+                conversationID, 
+                state.oldestLoadedMessageDate
+            );
             if(!success) return thunkAPI.rejectWithValue(error);
         } catch(error) {
             return thunkAPI.rejectWithValue(error);
@@ -120,7 +121,7 @@ const messagesSlice = createSlice({
         },
         clearHomeData: (state) => {
             state.contacts = [];
-            state.chattingWith = ''
+            state.chattingWith = '';
         },
         setShowNewMessagesPopUp: (state, action) => {
             state.showNewMessagesPopUp = action.payload;

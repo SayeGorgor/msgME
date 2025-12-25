@@ -14,7 +14,6 @@ export default function ContactCard(props) {
         username, 
         lastMessage, 
         conversationID, 
-        scrollMessageThreadToBottom,
         pfpPath
     } = props;
     const socket = useContext(SocketContext);
@@ -23,9 +22,7 @@ export default function ContactCard(props) {
 
     //Redux
     const dispatch = useDispatch();
-    const session = useSelector(state => state.auth.session);
     const currentConversationID = useSelector(state => state.messages.currentConversationID);
-    const messageLog = useSelector(state => state.messages.messageLog);
     
     //Load Conversation
     const loadConvo = async() => {
@@ -42,8 +39,6 @@ export default function ContactCard(props) {
         //Update the current conversation information
         dispatch(setChattingWith(username));
         dispatch(setCurrentConversationID(conversationID));
-        console.log('Conversation ID: ', conversationID);
-        console.log('Current Conversation ID: ', currentConversationID);
     }
 
     //Use Effect
@@ -56,9 +51,6 @@ export default function ContactCard(props) {
     useEffect(() => {
         const handler = (lastMessageData) => {
             const { newLastMessage, conversationIDCheck } = lastMessageData;
-            console.log('Update Convo: ', newLastMessage);
-            console.log('ConvoID: ', conversationID);
-            console.log('ConvoID Check: ', conversationIDCheck);
             if(conversationID === conversationIDCheck) {
                 setPrevLastMessage(newLastMessage);
             }

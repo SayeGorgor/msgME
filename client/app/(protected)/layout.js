@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
-import { supabaseServer } from "@/lib/server-actions";
+import { readOnlySupabaseServer } from "@/lib/server-actions";
 import HeaderAuth from "@/components/header-auth";
 
 export default async function ProtectedLayout({ children }) {
-    const supabase = await supabaseServer();
+    const supabase = await readOnlySupabaseServer();
 
-    const { data } = await supabase.auth.getUser();
+    const { data, error } = await supabase.auth.getUser();
 
     console.log('Data: ', data);
 
-    if(!data.user) redirect('/auth'); 
+    if(!data.user || error) redirect('/auth'); 
 
     return(
         <>

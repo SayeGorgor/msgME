@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowAccountOptionsWindow } from '@/lib/redux/slices/headerSlice';
 import styles from './icon-popup.module.css';
-import { logout, setIsAuthorized } from '@/lib/redux/slices/authSlice';
+import { logout } from '@/lib/redux/slices/authSlice';
 import { setShowAccountWindow } from '@/lib/redux/slices/accountSlice';
 import { useRouter } from 'next/navigation';
 import { clearHomeData } from '@/lib/redux/slices/messagesSlice';

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { login, setIsAuthorized, setIsLoading, signInWithProvider } from '@/lib/redux/slices/authSlice';
+import { setIsLoading, signInWithProvider } from '@/lib/redux/slices/authSlice';
 import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
 import { setHasError, setMessage } from '../lib/redux/slices/authSlice';
 
@@ -40,7 +40,6 @@ export default function LoginPopup() {
     const attemptLogin = async(e) => {
         e.preventDefault();
         dispatch(setHasError(false));
-        const credentials = {userID, password};
         dispatch(setIsLoading(true));
         dispatch(setMessage('Loading...'));
         const { error } = await supaLogin(userID, password);

@@ -1,10 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
+import { decideOnRequest } from '@/lib/redux/slices/friendRequestsSlice';
 import styles from './pending-request-card.module.css';
 
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';
 import AcceptIcon from '@/app/(icons)/checkmark_icon.svg';
 import RejectIcon from '@/app/(icons)/close_window_icon.svg';
-import { decideOnRequest } from '@/lib/redux/slices/friendRequestsSlice';
 
 export default function PendingRequestCard({ requestID, senderID, username, pfpPath }) {
     //Redux

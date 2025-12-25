@@ -29,21 +29,32 @@ export const supabaseServer = async() => {
     );
 }
 
+export const readOnlySupabaseServer = async() => {
+    const cookieStore = await cookies();
+
+    return createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL, 
+        process.env.NEXT_PUBLIC_SUPABASE_KEY,
+        {
+            cookies: {
+                get(name) {
+                    return cookieStore.get(name)?.value
+                },
+            },
+        }
+    );
+}
+
 export const supaLogin = async(userID, password) => {
     const supabaseServerClient = await supabaseServer();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmail = emailRegex.test(userID);
-    console.log('USer ID', userID);
-    console.log('isEmail: ', isEmail);
     //Handle log in as normal if userID is an email
     if(isEmail) {
         const {error} = await supabaseServerClient
             .auth
             .signInWithPassword({email: userID, password});
         if(error) return {success: false, error: error.message};
-
-        const { data: {user} } = await supabaseServerClient.auth.getUser()
-        console.log('Auth Events: ', user);
         
         redirect('/');
     }
@@ -54,7 +65,6 @@ export const supaLogin = async(userID, password) => {
         .select('email')
         .eq('username_lower', userID.trim().toLowerCase())
         .single();
-    console.log('User Data: ', data);
     const email = data.email;
     //Fail if email isnt found
     if(!email) return {success: false, error: 'Username not found'};
@@ -68,8 +78,6 @@ export const supaLogin = async(userID, password) => {
 export const supaInsert = async (userInfo) => {
     const { email, firstName, lastName, username, id } = userInfo;
 
-    console.log('INSIDE SUPAINSERT');
-
     const { data, error } = await supabase
         .from('users')
         .insert({
@@ -80,7 +88,6 @@ export const supaInsert = async (userInfo) => {
             'last_name': lastName
         })
         .single();
-    console.log("INSERT RESULT", { data, error });
     if(error) {
         return {success: false, message: error.message};
     };
@@ -91,7 +98,6 @@ export const supaInsert = async (userInfo) => {
 export const verifyNewUser = async(email, username) => {
     //Check if email is in use
     const { error:emailError } = await supabase.from('users').select('*').eq('email', email);
-    console.log('Email Data: ', emailError);
     if(emailError) return {success: false, message: 'Email already in use!'}
 
     //Check if username is in use
@@ -104,10 +110,7 @@ export const verifyNewUser = async(email, username) => {
 export const supaDelete = async(email) => {
     const { data, error } = await supabase.auth.admin.deleteUser(email);
 
-    if (error) {
-        console.error(error)
-        return { error }
-    }
+    if(error) return { error }
 
     return { data }
 }

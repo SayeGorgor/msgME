@@ -5,10 +5,8 @@ import { supaLogin } from "@/lib/server-actions";
 export const signup = createAsyncThunk(
     'auth/signup',
     async(userInfo, thunkAPI) => {
-        console.log('Starting Thunk');
         try {
             const userSignedUp = await supaSignup(userInfo);
-            console.log('userSignedUp: ', userSignedUp.success);
             if(!userSignedUp.success) return thunkAPI.rejectWithValue(userSignedUp.message);
         } catch(err) {
             return thunkAPI.rejectWithValue('Error Signing User');
@@ -19,9 +17,7 @@ export const signup = createAsyncThunk(
 export const login = createAsyncThunk(
     'auth/login',
     async(credentials, thunkAPI) => {
-        console.log('Credentials: ', credentials);
         const { userID, password } = credentials;
-        console.log('User ID: ', userID);
         try {
             const userLoggedIn = await supaLogin(userID, password);
             if(!userLoggedIn.success) return thunkAPI.rejectWithValue(userLoggedIn.message);
@@ -44,7 +40,6 @@ export const signInWithProvider = createAsyncThunk(
                     }
                 });
             if(error) {
-                console.log('Thunk Error: ', error);
                 return thunkAPI.rejectWithValue(error);
             }
         } catch(error) {

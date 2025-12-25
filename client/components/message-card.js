@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import styles from './message-card.module.css';
 
 export default function MessageCard(props) {
-    const { id, messageObj, senderID, content, timestamp, mediaPath } = props;
+    const { senderID, content, timestamp, mediaPath } = props;
     const fullTimestamp = new Date(timestamp);
     const hours = fullTimestamp.getHours();
     const displayHours = hours % 12 === 0 ? '12' : hours % 12;
@@ -21,11 +21,6 @@ export default function MessageCard(props) {
 
     //Functions
     const displayTime = () => {
-        console.log(messageObj);
-        console.log('Time stamp: ', fullTimestamp);
-        console.log('Raw time stamp: ', timestamp);
-        console.log('Media Path: ', mediaPath);
-        console.log('Content: ', content)
         setPreventAnimation(false);
         setShowTime(!showTime);
     }
@@ -35,14 +30,12 @@ export default function MessageCard(props) {
             {!fromUser ? 
                 (
                     <>
-                        <p 
-                            className={`
-                                ${styles.timestamp} 
-                                ${styles['contact-message']}
-                                ${showTime ? styles['time-visible'] : ''}
-                                ${preventAnimation ? styles['no-animation'] : ''}
-                            `}
-                        >
+                        <p className={`
+                            ${styles.timestamp} 
+                            ${styles['contact-message']}
+                            ${showTime ? styles['time-visible'] : ''}
+                            ${preventAnimation ? styles['no-animation'] : ''}
+                        `}>
                             {`${displayHours}:${minutes} ${timeOfDay}`}
                         </p>
                         <div className={styles['message-body']} onClick={displayTime}>
@@ -77,7 +70,8 @@ export default function MessageCard(props) {
                 :
                 (
                     <>
-                        <div className={`
+                        <div 
+                            className={`
                                 ${styles['message-body']} 
                                 ${fromUser ? styles['user-message'] : styles['contact-message']}
                             `}
@@ -109,14 +103,12 @@ export default function MessageCard(props) {
                                 )}
                             </div>
                         </div>
-                        <p
-                            className={`
-                                ${styles.timestamp} 
-                                ${styles['user-message']}
-                                ${showTime ? styles['time-visible'] : ''}
-                                ${preventAnimation ? styles['no-animation'] : ''}
-                            `}
-                        >
+                        <p className={`
+                            ${styles.timestamp} 
+                            ${styles['user-message']}
+                            ${showTime ? styles['time-visible'] : ''}
+                            ${preventAnimation ? styles['no-animation'] : ''}
+                        `}>
                             {`${displayHours}:${minutes} ${timeOfDay}`}
                         </p>
                     </>

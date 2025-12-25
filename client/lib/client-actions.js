@@ -2,7 +2,6 @@
 
 import { v4 as uuid } from 'uuid';
 import { createBrowserClient } from '@supabase/ssr';
-import { createClient } from "@supabase/supabase-js";
 import { supaInsert, verifyNewUser } from "./server-actions";
 
 export const supabaseAuth = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_KEY);
@@ -36,8 +35,6 @@ export const supaSignup = async(userInfo) => {
 export const supaLogin = async(userID, password) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmail = emailRegex.test(userID);
-    console.log('USer ID', userID);
-    console.log('isEmail: ', isEmail);
     //Handle log in as normal if userID is an email
     if(isEmail) {
         const {error} = await supabaseAuth
@@ -54,7 +51,6 @@ export const supaLogin = async(userID, password) => {
         .select('email')
         .eq('username_lower', userID.trim().toLowerCase())
         .single();
-    console.log('User Data: ', data);
     const email = data.email;
     //Fail if email isnt found
     if(!email) return {success: false, message: 'Username not found'};
@@ -100,16 +96,12 @@ export const fetchContacts = async(userID) => {
                 arg_contact_id: row['contact_id']
             }
         )
-        if(rpcError) {
-            console.log('RPC Error: ', rpcError.message);
-            return {success: false, error: rpcError.message};
-        }
+        if(rpcError) return {success: false, error: rpcError.message};
         const { data: conversationData, error } = await fetchConversationInfo(conversationID);
         if(error) return {success:false, error}
 
         //Get signed pfp url if contact has one
         if(contactData['pfp_path']) {
-            console.log('Contact PFP Path: ', contactData['pfp_path']);
             const { data:pfpData, error:pfpError } = await supabaseAuth.storage
                 .from('user_pfps')
                 .createSignedUrl(contactData['pfp_path'], 120);
@@ -136,7 +128,6 @@ export const searchByUsername = async(username) => {
         .eq('username', username)
         .single();
     if(error) return {success: false, message: 'User Not Found'}
-    console.log('Function Data: ', data);
 
     return {success: true, data}
 }
@@ -265,9 +256,7 @@ export const fetchFriendRequests = async(id) => {
         if(userInfoError) return {success: false, error: userInfoError.message};
         request['receiver_username'] = userInfoData.username;
 
-        console.log('U might be trippin')
         if(userInfoData['pfp_path']) {
-            console.log('U not tripping: ', userInfoData['pfp_path']);
             const { 
                 data: outgoingRequestsPFPData, 
                 error: outgoingRequestsPFPError 
@@ -376,11 +365,6 @@ export const supaInsertNewMessage = async(message) => {
         const ext = mediaPath.name.split('.').pop();
         fileName = `${conversationID}.${crypto.randomUUID()}.${ext}`;
 
-        console.log("Uploading with metadata:", {
-            'conversation_id': conversationID,
-            'sender_id': senderID
-        });
-
         const { error:storageError } = await supabaseAuth.storage
             .from('message_media')
             .upload(fileName, mediaPath, {
@@ -389,16 +373,13 @@ export const supaInsertNewMessage = async(message) => {
                     'sender_id': senderID
                 }    
             });
-        if(storageError) {
-            console.log('Store Error: ', storageError);
-            return {success: false, error: storageError.message};
-        }
+        if(storageError) return {success: false, error: storageError.message};
 
         const { data:mediaPathData, error:mediaPathError } = await supabaseAuth.storage
             .from('message_media')
             .createSignedUrl(fileName, 120);
 
-        newMediaPath = mediaPathData.signedUrl;
+        if(!mediaPathError) newMediaPath = mediaPathData.signedUrl;
     }
 
     const payload = {
@@ -413,10 +394,7 @@ export const supaInsertNewMessage = async(message) => {
         .from('messages')
         .insert(payload)
         .single();
-    if(messageError) {
-        console.log('Message Error: ', messageError);
-        return {success: false, error: messageError.message}
-    }
+    if(messageError) return {success: false, error: messageError.message};
 
     const { error:conversationError } = await supabaseAuth
         .from('conversations')
@@ -426,10 +404,7 @@ export const supaInsertNewMessage = async(message) => {
         })
         .eq('id', message.conversationID)
         .single();
-    if(conversationError) {
-        console.log('Conversation Error: ', conversationError);
-        return {success: false, error: conversationError.message};
-    }
+    if(conversationError) return {success: false, error: conversationError.message};
 
     return {success: true, data: newMediaPath};
 }
@@ -463,13 +438,10 @@ export const fetchMessages = async(requestInfo) => {
 
     for(let message of data) {
          if(message['media_path']) {
-            console.log('Image found')
             const { data:mediaPathData, error:mediaPathError } = await supabaseAuth.storage
                 .from('message_media')
                 .createSignedUrl(message['media_path'], 120);
-            
-            if(mediaPathError) console.log('Media Path Error: ', mediaPathError);
-            console.log('Signed Url: ', mediaPathData.signedUrl);
+
             message['media_path'] = mediaPathData.signedUrl;
         }
     }
@@ -488,15 +460,11 @@ export const fetchOlderMessages = async(conversationID, oldestMessageDate) => {
     if(error) return {success: false, error: error.message};
 
     for(let message of data) {
-        console.log('Message: ', message);
          if(message['media_path']) {
-            console.log('Image found')
             const { data:mediaPathData, error:mediaPathError } = await supabaseAuth.storage
                 .from('message_media')
                 .createSignedUrl(message['media_path'], 120);
-            
-            if(error) console.log('Media Path Error: ', mediaPathError);
-            console.log('Signed Url: ', mediaPathData.signedUrl);
+
             message['media_path'] = mediaPathData.signedUrl;
         }
     }
@@ -513,7 +481,6 @@ export const fetchAccountData = async(userID) => {
     if(error) return {success: false, error: error.message};
 
     if(data['pfp_path']) {
-        console.log('Path: ', data['pfp_path']);
         const { data:pfpPathData, error:pfpPathError } = await supabaseAuth.storage
             .from('user_pfps')
             .createSignedUrl(data['pfp_path'], 120);
@@ -525,20 +492,8 @@ export const fetchAccountData = async(userID) => {
     return {success: true, data};
 }
 
-const validateUsername = async(username) => {
-    const { data, error } = await supabaseAuth
-        .from('users')
-        .select('*')
-        .eq('username', username)
-        .single();
-    if(!error) return {success: false, error: 'Username already in use!'}
-
-    return {success: true};
-}
-
 export const supaUpdateAccountInfo = async(userID, newAccountInfo) => {
     let signedPFP = '';
-    console.log('New Account Info: ', newAccountInfo);
     const pfpPath = newAccountInfo['pfp_path'];
     
     if(pfpPath) {
@@ -548,10 +503,7 @@ export const supaUpdateAccountInfo = async(userID, newAccountInfo) => {
         const { error:storageError } = await supabaseAuth.storage
             .from('user_pfps')
             .upload(fileName, pfpPath);
-        if(storageError) {
-            console.log('Store Error: ', storageError);
-            return {success: false, error: storageError.message};
-        }
+        if(storageError) return {success: false, error: storageError.message};
 
         const { data:pfpPathData, error:pfpPathError } = await supabaseAuth.storage
             .from('user_pfps')

@@ -1,12 +1,17 @@
 'use client';
 
-import { friendRequestSearch, searchByUsername } from '@/lib/client-actions';
+import { friendRequestSearch } from '@/lib/client-actions';
 import { useState } from 'react';
 import styles from './add-friend-popup.module.css';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowAddContactWindow } from '@/lib/redux/slices/headerSlice';
-import { sendRequest, setHasFriendRequestError, setIsFriendRequestLoading, setFriendRequestMessage } from '@/lib/redux/slices/friendRequestsSlice';
+import { 
+    sendRequest, 
+    setHasFriendRequestError, 
+    setIsFriendRequestLoading, 
+    setFriendRequestMessage 
+} from '@/lib/redux/slices/friendRequestsSlice';
 
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import DefaultPFP from '@/app/(icons)/default_pfp.svg';

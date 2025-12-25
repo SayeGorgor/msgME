@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styles from './signup-popup.module.css';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
 import { setShowSignupWindow } from '@/lib/redux/slices/headerSlice';
-import { setIsLoading, setMessage, signup } from '@/lib/redux/slices/authSlice';
+import { setMessage, signup } from '@/lib/redux/slices/authSlice';
 import { setHasError } from '../lib/redux/slices/authSlice';
 
 export default function SignupPopup() {
@@ -39,7 +39,6 @@ export default function SignupPopup() {
 
     const attemptSignUp = async(e) => {
         e.preventDefault();
-        console.log('Attempting Sign Up');
         if(password !== passwordConfirm) {
             dispatch(setHasError(true));
             dispatch(setMessage('Passwords must match!'));
