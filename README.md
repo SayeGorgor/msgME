@@ -5,9 +5,9 @@ This is a responsive full stack messenger web app that allows users to message t
 ## Features
 
 -Sign Up and Log In Functionality  
--Oauth Support (Github and Instagram)
--Add Friends and Customize Your Profile 
--Realtime Messaging
+-Oauth Support (Github and Instagram)  
+-Add Friends and Customize Your Profile  
+-Realtime Messaging  
 
 ## Planned Bug Fixes / Improvements
 
