@@ -1,12 +1,16 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsLoading, signInWithProvider } from '@/lib/redux/slices/authSlice';
 import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
 import { setHasError, setMessage } from '../lib/redux/slices/authSlice';
+import { 
+    setIsLoading, 
+    setPasswordInput, 
+    setUserIDInput, 
+    signInWithProvider 
+} from '@/lib/redux/slices/authSlice';
 
 import styles from './login-popup.module.css';
 import CloseWindowIcon from '@/app/(icons)/close_window_icon.svg';
@@ -23,18 +27,16 @@ export default function LoginPopup() {
     const showLoginWindow = useSelector(state => state.header.showLoginWindow);
     const hasError = useSelector(state => state.auth.hasError);
     const message = useSelector(state => state.auth.message);
-
-    //States
-    const [userID, setuserID] = useState('');
-    const [password, setPassword] = useState('');
+    const userID = useSelector(state => state.auth.userIDInput);
+    const password = useSelector(state => state.auth.passwordInput);
 
     //Functions
     const closeLoginWindow = () => {
         dispatch(setShowLoginWindow(false));
         dispatch(setMessage(''));
         dispatch(setHasError(false));
-        setuserID('');
-        setPassword('');
+        dispatch(setUserIDInput(''));
+        dispatch(setPasswordInput(''));
     }
 
     const attemptLogin = async(e) => {
@@ -66,7 +68,7 @@ export default function LoginPopup() {
                         type='text'
                         name='user-id'
                         value={userID}
-                        onChange={(e) => setuserID(e.target.value)}
+                        onChange={(e) => dispatch(setUserIDInput(e.target.value))}
                         placeholder='Email or Username'
                         autoComplete='username'
                     />
@@ -74,7 +76,7 @@ export default function LoginPopup() {
                         type='password'
                         name='password'
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => dispatch(setPasswordInput(e.target.value))}
                         placeholder='Password'
                         autoComplete='current-password'
                     />

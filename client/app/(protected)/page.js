@@ -13,8 +13,10 @@ import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
 import { clearHomeData, loadContacts  } from '@/lib/redux/slices/messagesSlice';
 import { 
     logout,
+    setPasswordInput,
     setSession, 
-    setUser 
+    setUser, 
+    setUserIDInput
 } from "@/lib/redux/slices/authSlice";
 
 import ContactsSection from '@/components/contacts-section';
@@ -34,8 +36,10 @@ export default function Home() {
     //Use Effects
     //Grab session on load and auth change
     useEffect(() => {
-        //Close login window on successful login
+        //Close login window and clear info on successful login
         dispatch(setShowLoginWindow(false));
+        dispatch(setUserIDInput(''));
+        dispatch(setPasswordInput(''));
 
         // Load initial session on first render
         supabaseAuth.auth.getSession().then(({ data, error }) => {

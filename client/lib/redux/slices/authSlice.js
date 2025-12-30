@@ -67,6 +67,8 @@ export const authSlice = createSlice({
         isLoading: false,
         hasError: false,
         user: '',
+        userIDInput: '',
+        passwordInput: '',
         session: {}
     },
     reducers: {
@@ -87,6 +89,12 @@ export const authSlice = createSlice({
         },
         setSession: (state, action) => {
             state.session = action.payload;
+        },
+        setUserIDInput: (state, action) => {
+            state.userIDInput = action.payload;
+        },
+        setPasswordInput: (state, action) => {
+            state.passwordInput = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -164,7 +172,9 @@ export const {
     setIsLoading,
     setHasError,
     setSession,
-    setUser
+    setUser,
+    setUserIDInput,
+    setPasswordInput
 } = authSlice.actions;
 
 export default authSlice.reducer;
