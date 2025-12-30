@@ -15,7 +15,7 @@ This is a responsive full stack messenger web app that allows users to message t
 
 ## Tech Stack
 
-**Frontend:** React (Next.js), React Router, Redux  
+**Frontend:** React (Next.js), Redux  
 **Backend:** Express, Node.js, PostgreSQL (Supabase), Socket.io  
 **Build Tool:** Vite  
 **Deployed With:** Vercel.com (Frontend), Railway.com (Backend)
