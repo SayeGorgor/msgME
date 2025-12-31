@@ -1,7 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 import { useDispatch, useSelector } from 'react-redux';
 import { setShowLoginWindow } from '@/lib/redux/slices/headerSlice';
 import { setHasError, setMessage } from '../lib/redux/slices/authSlice';
@@ -20,8 +18,6 @@ import AppleLogo from '@/app/(icons)/apple_logo.svg';
 import { supaLogin } from '@/lib/server-actions';
 
 export default function LoginPopup() {
-    const router = useRouter();
-    
     //Redux
     const dispatch = useDispatch();
     const showLoginWindow = useSelector(state => state.header.showLoginWindow);
