@@ -437,7 +437,7 @@ export const fetchMessages = async(requestInfo) => {
     }
 
     for(let message of data) {
-         if(message['media_path']) {
+        if(message['media_path']) {
             const { data:mediaPathData, error:mediaPathError } = await supabaseAuth.storage
                 .from('message_media')
                 .createSignedUrl(message['media_path'], 120);

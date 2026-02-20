@@ -55,7 +55,9 @@ export default function SignupPopup() {
                     className={styles['close-window-icon']} 
                     onClick={closeWindow}
                 />
+
                 <h2>Sign Up</h2>
+
                 {message && 
                     <p className={`
                         ${styles.message} 
@@ -65,8 +67,11 @@ export default function SignupPopup() {
                         {message}
                     </p>
                 }
+
                 <form className={styles['signup-form']} onSubmit={attemptSignUp}>
+
                     <div className={styles['name-fields']}>
+
                         <input 
                             type='text'
                             name='first-name'
@@ -76,6 +81,7 @@ export default function SignupPopup() {
                             autoComplete='given-name'
                             required
                         />
+
                         <input 
                             type='text'
                             name='last-name'
@@ -86,6 +92,7 @@ export default function SignupPopup() {
                             required
                         />
                     </div>
+
                     <input 
                         type='email'
                         name='email'
@@ -95,6 +102,7 @@ export default function SignupPopup() {
                         autoComplete='email'
                         required
                     />
+
                     <input 
                         type='text'
                         name='username'
@@ -104,6 +112,7 @@ export default function SignupPopup() {
                         autoComplete='username'
                         required
                     />
+
                     <input 
                         type='password'
                         name='password'
@@ -113,6 +122,7 @@ export default function SignupPopup() {
                         autoComplete='new-password'
                         required
                     />
+
                     <input 
                         type='password'
                         name='password-confirm'
@@ -122,9 +132,11 @@ export default function SignupPopup() {
                         autoComplete='new-password'
                         required
                     />
+
                     <button type='submit'>Sign Up</button>
                 </form>
             </div>
+            
             <div 
                 className={`
                     ${styles.overlay} 

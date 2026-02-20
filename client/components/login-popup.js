@@ -84,22 +84,7 @@ export default function LoginPopup() {
                     <hr />
                 </div>
                 <ul className={styles['external-login-options-list']}>
-                    <li>
-                        <div 
-                            className={`
-                                ${styles['external-login-option']}
-                                ${styles.apple}
-                            `} 
-                        >
-                            <AppleLogo 
-                                className={`
-                                    ${styles.logo}
-                                    ${styles.apple}
-                                `} 
-                             />
-                            <p>Sign in with Apple</p>
-                        </div>
-                    </li>
+
                     <li>
                         <div 
                             className={styles['external-login-option']}

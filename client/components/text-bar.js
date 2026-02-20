@@ -84,7 +84,9 @@ export default function TextBar({ scrollMessageThreadToBottom, preview, setPrevi
             className={styles.body} 
             onSubmit={sendMessage}
         >
-            <NewMessagePopUp />
+            <NewMessagePopUp 
+                scrollMessageThreadToBottom={scrollMessageThreadToBottom} 
+            />
             <div className={styles['content-section']}>
                 <div className={`
                     ${styles['image-section']} 

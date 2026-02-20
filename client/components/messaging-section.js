@@ -2,7 +2,7 @@
 
 import { SocketContext } from '@/lib/socket/socket';
 
-import { useState, useEffect, useRef, useContext } from 'react'; 
+import { useState, useEffect, useLayoutEffect, useRef, useContext } from 'react'; 
 import styles from './messaging-section.module.css';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,6 +26,7 @@ export default function MessagingSection() {
     //Refs
     const threadRef = useRef(null);
     const threadSentinelRef = useRef(null);
+    const prevScrollHeightRef = useRef(0);
 
     //Redux
     const dispatch = useDispatch();
@@ -42,7 +43,6 @@ export default function MessagingSection() {
 
     //States
     const [preview, setPreview] = useState('');
-    const [initialMount, setInitialMount] = useState(true);
 
     //Functions
     const scrollMessageThreadToBottom = () => {
@@ -68,6 +68,17 @@ export default function MessagingSection() {
         const handler = (messageData) => {
             console.log('Socket Message: ', messageData);
             dispatch(addMessage(messageData));
+
+            const thread = threadRef.current;
+            if(!thread) return;
+        
+            const distanceToBottom = 
+                thread.scrollHeight - thread.scrollTop - thread.clientHeight;
+            if(distanceToBottom < 400) {
+                scrollMessageThreadToBottom();
+            } else {
+                dispatch(setShowNewMessagesPopUp(true));
+            }
         }
 
         socket.on('received_message', handler);
@@ -79,27 +90,6 @@ export default function MessagingSection() {
     useEffect(() => {
         scrollMessageThreadToBottom();
     }, []);
-
-    //Scroll Message Log to Bottom on Message Received If Near Bottom,
-    //Otherwise Show New Messages Pop Up
-    useEffect(() => {
-        //Do nothing on first mount
-        if(initialMount) {
-            setInitialMount(false);
-            return;
-        }
-    
-        const thread = threadRef.current;
-        if(!thread) return;
-    
-        const distanceToBottom = 
-            thread.scrollHeight - thread.scrollTop - thread.clientHeight;
-        if(distanceToBottom < 400) {
-            scrollMessageThreadToBottom();
-        } else {
-            dispatch(setShowNewMessagesPopUp(true));
-        }
-    }, [messageLog]);
 
     //Clear Chatting With On Logout
     useEffect(() => {
@@ -120,12 +110,9 @@ export default function MessagingSection() {
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if(entry.isIntersecting) {
-                    console.log('Intersection Conditions Status: ', isLoading, hasMoreMessages);
-                }
                 if(entry.isIntersecting && !isLoading && hasMoreMessages) {
-                    console.log('Intersection Conditions Found');
-                    console.log('Current Conversation ID: ', currentConversationID);
+                    const container = threadRef.current;
+                    prevScrollHeightRef.current = container.scrollHeight;
                     dispatch(loadMessages({
                         conversationID: currentConversationID, 
                         oldestMessageDate: oldestLoadedMessageDate
@@ -143,6 +130,18 @@ export default function MessagingSection() {
     
         return () => observer.disconnect();
     }, [hasMoreMessages, isLoading, currentConversationID]);
+
+    useLayoutEffect(() => {
+        const container = threadRef.current;
+        if (!container || prevScrollHeightRef.current === 0) return;
+
+        const newScrollHeight = container.scrollHeight;
+        const heightDiff = newScrollHeight - prevScrollHeightRef.current;
+
+        container.scrollTop += heightDiff;
+
+        prevScrollHeightRef.current = 0;
+    }, [messageLog]);
 
     return(
         <div className={styles.body}>
