@@ -76,16 +76,17 @@ export const supaLogin = async(userID, password) => {
 }
 
 export const supaInsert = async (userInfo) => {
-    const { email, firstName, lastName, username, id } = userInfo;
+    const { email, firstName, lastName, username, id, avatar } = userInfo;
 
     const { data, error } = await supabase
         .from('users')
-        .insert({
-            id: id,
-            email: email, 
-            username: username, 
-            'first_name': firstName, 
-            'last_name': lastName
+        .upsert({
+            id: user.id,
+            email: user.email,
+            username,
+            'first_name': firstName,
+            'last_name': lastName,
+            ...(avatar && {'pfp_path': avatar})
         })
         .single();
     if(error) {

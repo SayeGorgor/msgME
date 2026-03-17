@@ -10,18 +10,16 @@ export default function Callback() {
 
     useEffect(() => {
         const finishedLogin = async() => {
-            const { user, error } = await supabaseAuth.auth.getUser();
-            const { data:session } = await supabaseAuth.auth.getSession();
+            const { data:{user}, error:userError } = await supabaseAuth.auth.getUser();
+            const { data:session, error:sessionError } = await supabaseAuth.auth.getSession();
 
-            if(!error) {
+            if(!userError) {
                 const { success } = await supaVerifyNewUser({email: user?.email});
-                if(success) {
-                    console.log('User: ', user);
+                if(!success) {
                     const fullName = user.user_metadata.full_name || '';
-                    const avatar = user.user_metadata.avatar_url || '';
                     const [firstName, ...rest] = fullName.split(" ");
                     const lastName = rest.join(" ");
-                    const username = `user${Math.random() * 900000 + 100000}`;
+                    const username = `user${Math.floor(Math.random() * 900000 + 100000)}`;
 
                     await supabaseAuth
                         .from('users')
@@ -30,8 +28,7 @@ export default function Callback() {
                             email: user.email,
                             username,
                             'first_name': firstName,
-                            'last_name': lastName,
-                            ...(avatar && {'pfp_path': avatar})
+                            'last_name': lastName ?? 'Smith'
                         });
                 }
                 dispatch(setSession(session));

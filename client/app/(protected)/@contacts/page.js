@@ -1,3 +1,5 @@
+'use client';
+
 import { Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from './page.module.css';
