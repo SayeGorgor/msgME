@@ -39,10 +39,6 @@ export const signInWithProvider = createAsyncThunk(
                         redirectTo: `${window.location.origin}/auth/callback`,
                     }
                 });
-//                 const redirectTo =
-//   process.env.NODE_ENV === 'development'
-//     ? 'http://localhost:3000/auth/callback'
-//     : 'https://your-production-site.com/auth/callback';
             if(error) {
                 return thunkAPI.rejectWithValue(error);
             }

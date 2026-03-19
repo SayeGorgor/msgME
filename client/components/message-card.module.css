@@ -28,7 +28,7 @@
 .message-body {
   display: flex;
   align-items: center;
-  min-height: 3rem;
+  height: fit-content;
   padding: 0 .5rem;
   z-index: 2;
 }

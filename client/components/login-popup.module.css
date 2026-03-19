@@ -9,6 +9,7 @@
     /* height: 30rem; */
     width: 25rem;
     background-color: rgb(240, 251, 255);
+    color: black;
     border-radius: 2rem;
     z-index: 2;
 }

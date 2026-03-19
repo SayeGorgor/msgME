@@ -4,6 +4,7 @@
     top: 4rem;
     right: 0;
     background-color: white;
+    color: black;
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 4;

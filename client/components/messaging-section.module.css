@@ -14,6 +14,10 @@
   padding: 0;
 }
 
+.message-thread li {
+  margin-top: .5rem;
+}
+
 .message-thread.image-view {
   transform: translateY(-10rem);
   animation: SlideMessagesUp .3s ease;

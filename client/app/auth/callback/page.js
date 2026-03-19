@@ -15,7 +15,7 @@ export default function Callback() {
 
             if(!userError) {
                 const { success } = await supaVerifyNewUser({email: user?.email});
-                if(!success) {
+                if(success) {
                     const fullName = user.user_metadata.full_name || '';
                     const [firstName, ...rest] = fullName.split(" ");
                     const lastName = rest.join(" ");

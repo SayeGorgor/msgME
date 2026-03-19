@@ -526,10 +526,10 @@ export const supaUpdateAccountInfo = async(userID, newAccountInfo) => {
     };
 }
 
-export const supaVerifyNewUser = (userInfo) => {
+export const supaVerifyNewUser = async(userInfo) => {
     const { email, username } = userInfo;
     if(email) {
-        const { error: emailError } =  supabaseAuth
+        const { error: emailError } = await supabaseAuth
             .from('users')
             .select('*')
             .eq('email', email)
@@ -538,7 +538,7 @@ export const supaVerifyNewUser = (userInfo) => {
     }
 
     if(username) {
-        const { error: usernameError } =  supabaseAuth
+        const { error: usernameError } = await supabaseAuth
             .from('users')
             .select('*')
             .eq('username', username)
