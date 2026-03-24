@@ -553,7 +553,7 @@ export const friendRequestSearch = async(username) => {
     const { data:userData, error:userError } = await supabaseAuth
         .from('users')
         .select('username, pfp_path')
-        .eq('username', username)
+        .ilike('username', username)
         .single();
     if(userError) return {success: false, error: 'User Not Found'}
 
