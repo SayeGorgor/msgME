@@ -109,7 +109,7 @@ export default function MessageCard(props) {
                             ${showTime ? styles['time-visible'] : ''}
                             ${preventAnimation ? styles['no-animation'] : ''}
                         `}>
-                            {`${displayHours}:${minutes} ${timeOfDay}`}
+                            {`${displayHours}:${minutes < 10 ? '0' + minutes : minutes} ${timeOfDay}`}
                         </p>
                     </>
                 )
